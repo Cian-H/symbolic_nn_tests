@@ -1,5 +1,4 @@
-def main():
-    print("Working")
+from .ffnn import main
 
 
 if __name__ == "__main__":

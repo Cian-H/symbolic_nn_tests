@@ -1,6 +1,6 @@
 from pathlib import Path
 from torchvision.datasets import Caltech256
-from torchvision.transforms import ToTensor
+from torchvision.transforms import Compose, Lambda, ToTensor
 from torch.utils.data import random_split
 from torch.utils.data import BatchSampler
 
@@ -15,7 +15,9 @@ def get_dataset(
     drop_last: bool = False,
     **kwargs,
 ):
-    _kwargs = {"transform": ToTensor()}
+    _kwargs = {
+        "transform": ToTensor(),
+    }
     _kwargs.update(kwargs)
     ds = dataset(PROJECT_ROOT / "datasets/", download=True, **_kwargs)
     train, test, val = (
