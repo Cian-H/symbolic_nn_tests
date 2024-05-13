@@ -20,6 +20,7 @@ ipython = "^8.24.0"
 matplotlib-backend-kitty = "^2.1.2"
 euporie = "^2.8.2"
 ipykernel = "^6.29.4"
+tensorboard = "^2.16.2"
 
 
 [build-system]
