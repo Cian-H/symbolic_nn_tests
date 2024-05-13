@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "symbolic-nn-tests"
+version = "0.1.0"
+description = ""
+authors = ["Cian Hughes <chughes000@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+torch = "^2.3.0"
+lightning = "^2.2.4"
+torchvision = "^0.18.0"
+wandb = "^0.17.0"
+optuna = "^3.6.1"
+setuptools = "^69.5.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
