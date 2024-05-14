@@ -1,3 +1,4 @@
+from functools import lru_cache
 from torch import nn
 
 
@@ -8,11 +9,19 @@ model = nn.Sequential(
 )
 
 
-def main(loss_func=nn.functional.cross_entropy, logger=None):
+# This is just a quick, lazy way to ensure all models are trained on the same dataset
+@lru_cache(maxsize=1)
+def get_singleton_dataset():
     from torchvision.datasets import QMNIST
-    import lightning as L
 
     from .dataloader import get_dataset
+
+    return get_dataset(dataset=QMNIST)
+
+
+def main(loss_func=nn.functional.cross_entropy, logger=None):
+    import lightning as L
+
     from .train import TrainingWrapper
 
     if logger is None:
@@ -20,8 +29,8 @@ def main(loss_func=nn.functional.cross_entropy, logger=None):
 
         logger = TensorBoardLogger(save_dir=".", name="logs/ffnn")
 
-    train, val, test = get_dataset(dataset=QMNIST)
-    lmodel = TrainingWrapper(model)
+    train, val, test = get_singleton_dataset()
+    lmodel = TrainingWrapper(model, loss_func=loss_func)
     trainer = L.Trainer(max_epochs=5, logger=logger)
     trainer.fit(model=lmodel, train_dataloaders=train, val_dataloaders=val)
 

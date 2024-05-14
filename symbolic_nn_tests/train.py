@@ -22,7 +22,8 @@ class TrainingWrapper(L.LightningModule):
         x, y = collate_batch(batch)
         y_pred = self.model(x)
         batch_size = x.shape[0]
-        loss = self.loss_func(y_pred, nn.functional.one_hot(y).type(torch.float64))
+        one_hot_y = nn.functional.one_hot(y).type(torch.float64)
+        loss = self.loss_func(y_pred, one_hot_y)
         acc = torch.sum(y_pred.argmax(dim=1) == y) / batch_size
         self.log(f"{label}{'_' if label else ''}loss", loss, batch_size=batch_size)
         self.log(f"{label}{'_' if label else ''}acc", acc, batch_size=batch_size)
