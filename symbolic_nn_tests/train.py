@@ -12,25 +12,28 @@ def collate_batch(batch):
     return x, y
 
 
-class Trainer(L.LightningModule):
+class TrainingWrapper(L.LightningModule):
     def __init__(self, model, loss_func=nn.functional.cross_entropy):
         super().__init__()
         self.model = model
         self.loss_func = loss_func
 
-    def training_step(self, batch, batch_idx):
+    def _forward_step(self, batch, batch_idx, label=""):
         x, y = collate_batch(batch)
         y_pred = self.model(x)
-        loss = self.loss_func(y_pred, y)
-        self.log("train_loss", loss)
+        batch_size = x.shape[0]
+        loss = self.loss_func(y_pred, nn.functional.one_hot(y).type(torch.float64))
+        acc = torch.sum(y_pred.argmax(dim=1) == y) / batch_size
+        self.log(f"{label}{'_' if label else ''}loss", loss, batch_size=batch_size)
+        self.log(f"{label}{'_' if label else ''}acc", acc, batch_size=batch_size)
+        return loss, acc
+
+    def training_step(self, batch, batch_idx):
+        loss, _ = self._forward_step(batch, batch_idx, label="train")
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x, y = collate_batch(batch)
-        y_pred = self.model(x)
-        loss = self.loss_func(y_pred, y)
-        self.log("val_loss", loss)
-        return loss
+        self._forward_step(batch, batch_idx, label="val")
 
     def configure_optimizers(self, optimizer=optim.Adam, *args, **kwargs):
         _optimizer = optimizer(self.parameters(), *args, **kwargs)

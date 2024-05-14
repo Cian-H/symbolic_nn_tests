@@ -1,5 +1,8 @@
-from .ffnn import main
+from .model import main
 
 
 if __name__ == "__main__":
-    main()
+    from lightning.pytorch.loggers import TensorBoardLogger
+
+    logger = TensorBoardLogger(save_dir=".", name="logs/ffnn")
+    main(logger)
