@@ -31,6 +31,7 @@ def main():
     run_test(semantic_loss.hasline_cross_entropy, "hasline_cross_entropy")
     run_test(semantic_loss.hasloop_cross_entropy, "hasloop_cross_entropy")
     run_test(semantic_loss.multisemantic_cross_entropy, "multisemantic_cross_entropy")
+    run_test(semantic_loss.garbage_cross_entropy, "garbage_cross_entropy")
 
 
 if __name__ == "__main__":

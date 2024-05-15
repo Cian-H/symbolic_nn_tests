@@ -73,3 +73,11 @@ MULTISEMANTIC_MATRIX = SIMILARITY_MATRIX * HASLINE_MATRIX * HASLOOP_MATRIX
 MULTISEMANTIC_MATRIX /= MULTISEMANTIC_MATRIX.sum()
 
 multisemantic_cross_entropy = create_semantic_cross_entropy(MULTISEMANTIC_MATRIX)
+
+# NOTE: As a final test, lets make something similar to tehse but where there's no knowledge,
+#   just random data. This will create a benchmark for the effects of this process wothout the
+#   "knowledge" component
+GARBAGE_MATRIX = torch.rand(10, 10).to("cuda")
+GARBAGE_MATRIX /= GARBAGE_MATRIX.sum()
+
+garbage_cross_entropy = create_semantic_cross_entropy(GARBAGE_MATRIX)
