@@ -164,3 +164,4 @@ cython_debug/
 datasets/
 lightning_logs/
 logs/
+wandb/
