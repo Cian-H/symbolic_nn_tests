@@ -19,7 +19,7 @@ def get_singleton_dataset():
     return get_dataset(dataset=QMNIST)
 
 
-def main(loss_func=nn.functional.cross_entropy, logger=None):
+def main(loss_func=nn.functional.cross_entropy, logger=None, **kwargs):
     import lightning as L
 
     from .train import TrainingWrapper
@@ -31,7 +31,8 @@ def main(loss_func=nn.functional.cross_entropy, logger=None):
 
     train, val, test = get_singleton_dataset()
     lmodel = TrainingWrapper(model, loss_func=loss_func)
-    trainer = L.Trainer(max_epochs=5, logger=logger)
+    lmodel.configure_optimizers(**kwargs)
+    trainer = L.Trainer(max_epochs=20, logger=logger)
     trainer.fit(model=lmodel, train_dataloaders=train, val_dataloaders=val)
 
 
