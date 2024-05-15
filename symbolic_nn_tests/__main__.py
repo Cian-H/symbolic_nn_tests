@@ -5,15 +5,21 @@ def run_test(loss_func, version):
     from .model import main as test_model
     from lightning.pytorch.loggers import TensorBoardLogger
     from lightning.pytorch.loggers import WandbLogger
+    import wandb
 
     tb_logger = TensorBoardLogger(
         save_dir=".",
         name="logs/comparison",
         version=version,
     )
-    wandb_logger = WandbLogger(project="Semantic_Loss_Tests")
+    wandb_logger = WandbLogger(
+        project="Symbolic_NN_Tests",
+        name=version,
+        dir="wandb",
+    )
     logger = [tb_logger, wandb_logger]
     test_model(logger=logger, loss_func=loss_func, lr=LEARNING_RATE)
+    wandb.finish()
 
 
 def main():
