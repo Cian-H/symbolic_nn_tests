@@ -36,6 +36,9 @@ class TrainingWrapper(L.LightningModule):
     def validation_step(self, batch, batch_idx):
         self._forward_step(batch, batch_idx, label="val")
 
-    def configure_optimizers(self, optimizer=optim.Adam, *args, **kwargs):
-        _optimizer = optimizer(self.parameters(), *args, **kwargs)
+    def test_step(self, batch, batch_idx):
+        self._forward_step(batch, batch_idx, label="test")
+
+    def configure_optimizers(self, optimizer=optim.SGD, **kwargs):
+        _optimizer = optimizer(self.parameters(), **kwargs)
         return _optimizer
