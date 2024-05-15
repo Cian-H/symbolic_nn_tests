@@ -11,7 +11,7 @@ def run_test(loss_func, version):
         name="logs/comparison",
         version=version,
     )
-    wandb_logger = WandbLogger(project="MNIST")
+    wandb_logger = WandbLogger(project="Semantic_Loss_Tests")
     logger = [tb_logger, wandb_logger]
     test_model(logger=logger, loss_func=loss_func, lr=LEARNING_RATE)
 
