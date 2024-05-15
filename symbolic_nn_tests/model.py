@@ -32,7 +32,7 @@ def main(loss_func=nn.functional.cross_entropy, logger=None, **kwargs):
     train, val, test = get_singleton_dataset()
     lmodel = TrainingWrapper(model, loss_func=loss_func)
     lmodel.configure_optimizers(**kwargs)
-    trainer = L.Trainer(max_epochs=1, logger=logger)
+    trainer = L.Trainer(max_epochs=20, logger=logger)
     trainer.fit(model=lmodel, train_dataloaders=train, val_dataloaders=val)
     trainer.test(dataloaders=test)
 
