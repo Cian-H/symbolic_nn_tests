@@ -34,6 +34,7 @@ def main(loss_func=nn.functional.cross_entropy, logger=None, **kwargs):
     lmodel.configure_optimizers(**kwargs)
     trainer = L.Trainer(max_epochs=20, logger=logger)
     trainer.fit(model=lmodel, train_dataloaders=train, val_dataloaders=val)
+    trainer.test(dataloaders=test)
 
 
 if __name__ == "__main__":
