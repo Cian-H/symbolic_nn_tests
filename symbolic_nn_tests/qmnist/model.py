@@ -14,7 +14,7 @@ model = nn.Sequential(
 def get_singleton_dataset():
     from torchvision.datasets import QMNIST
 
-    from .dataloader import get_dataset
+    from symbolic_nn_tests.dataloader import get_dataset
 
     return get_dataset(dataset=QMNIST)
 
@@ -22,7 +22,7 @@ def get_singleton_dataset():
 def main(loss_func=nn.functional.cross_entropy, logger=None, **kwargs):
     import lightning as L
 
-    from .train import TrainingWrapper
+    from symbolic_nn_tests.train import TrainingWrapper
 
     if logger is None:
         from lightning.pytorch.loggers import TensorBoardLogger
