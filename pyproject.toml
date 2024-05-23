@@ -21,6 +21,7 @@ matplotlib-backend-kitty = "^2.1.2"
 euporie = "^2.8.2"
 ipykernel = "^6.29.4"
 tensorboard = "^2.16.2"
+typer = "^0.12.3"
 
 
 [build-system]
