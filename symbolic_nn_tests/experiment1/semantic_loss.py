@@ -10,7 +10,10 @@ def create_semantic_cross_entropy(semantic_matrix):
         semantic_penalty = (abs_diff * penalty_tensor).sum()
         return ce_loss * semantic_penalty
 
-    return semantic_cross_entropy
+    def oh_vs_cat_semantic_cross_entropy(input_oh, target_cat):
+        return semantic_cross_entropy(input_oh, torch.nn.functional.one_hot(target_cat))
+
+    return oh_vs_cat_semantic_cross_entropy
 
 
 # NOTE: This similarity matrix defines loss scaling factors for misclassification

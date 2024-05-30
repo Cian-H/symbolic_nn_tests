@@ -22,6 +22,12 @@ euporie = "^2.8.2"
 ipykernel = "^6.29.4"
 tensorboard = "^2.16.2"
 typer = "^0.12.3"
+kaggle = "^1.6.14"
+periodic-table-dataclasses = "^1.0"
+polars = "^0.20.28"
+jupyter = "^1.0.0"
+safetensors = "^0.4.3"
+alive-progress = "^3.1.5"
 
 
 [build-system]

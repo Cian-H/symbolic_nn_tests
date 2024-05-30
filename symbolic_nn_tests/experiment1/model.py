@@ -1,4 +1,5 @@
 from functools import lru_cache
+import torch
 from torch import nn
 
 
@@ -9,17 +10,35 @@ model = nn.Sequential(
 )
 
 
+def collate(batch):
+    x, y = zip(*batch)
+    x = [i[0] for i in x]
+    y = [torch.tensor(i) for i in y]
+    x = torch.stack(x).to("cuda")
+    y = torch.tensor(y).to("cuda")
+    return x, y
+
+
 # This is just a quick, lazy way to ensure all models are trained on the same dataset
 @lru_cache(maxsize=1)
 def get_singleton_dataset():
     from torchvision.datasets import QMNIST
 
-    from symbolic_nn_tests.dataloader import get_dataset
+    from symbolic_nn_tests.dataloader import create_dataset
 
-    return get_dataset(dataset=QMNIST)
+    return create_dataset(
+        dataset=QMNIST, collate_fn=collate, batch_size=128, shuffle=True
+    )
 
 
-def main(loss_func=nn.functional.cross_entropy, logger=None, **kwargs):
+def oh_vs_cat_cross_entropy(y_bin, y_cat):
+    return nn.functional.cross_entropy(
+        y_bin,
+        nn.functional.one_hot(y_cat),
+    )
+
+
+def main(loss_func=oh_vs_cat_cross_entropy, logger=None, **kwargs):
     import lightning as L
 
     from symbolic_nn_tests.train import TrainingWrapper
