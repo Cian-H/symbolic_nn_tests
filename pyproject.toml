@@ -28,6 +28,8 @@ polars = "^0.20.28"
 jupyter = "^1.0.0"
 safetensors = "^0.4.3"
 alive-progress = "^3.1.5"
+hvplot = "^0.10.0"
+pyarrow = "^16.1.0"
 
 
 [build-system]

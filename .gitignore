@@ -164,6 +164,7 @@ cython_debug/
 .jj
 scratchpad.ipynb
 datasets/
+explore/
 lightning_logs/
 logs/
 wandb/
