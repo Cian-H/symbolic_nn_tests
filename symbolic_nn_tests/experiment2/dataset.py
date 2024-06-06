@@ -11,6 +11,7 @@ from multiprocessing import Pool
 from symbolic_nn_tests.dataloader import DATASET_DIR
 import warnings
 from tqdm.auto import tqdm
+from loguru import logger
 
 
 warnings.filterwarnings(action="ignore", category=UserWarning)
@@ -47,58 +48,58 @@ def get_dataset():
     ):
         construct_dataset("pubchem")
     else:
-        print("Pre-existing dataset detected!")
-    print("Dataset loaded!")
+        logger.info("Pre-existing dataset detected!")
+    logger.info("Dataset loaded!")
     return TensorDataset(*load_dataset("pubchem"))
 
 
 def construct_dataset(filename):
-    print("Constructing dataset...")
+    logger.info("Constructing dataset...")
     df = construct_ds_dataframe(filename)
     save_dataframe_to_dataset(df, PUBCHEM_DIR / f"{filename}.pickle")
-    print("Dataset constructed!")
+    logger.info("Dataset constructed!")
 
 
 def construct_ds_dataframe(filename):
-    print("Constructing dataset dataframe...")
+    logger.info("Constructing dataset dataframe...")
     df = add_molecule_encodings(construct_raw_dataset(filename))
     # NOTE: This kind of checkpointing will be used throughout the construction process It doesn't
     # take much disk space, it lets the GC collect out-of-scope data from the construction process
     # and it makes it easier to debug if construction fails
     parquet_file = PUBCHEM_DIR / f"{filename}.parquet"
     df.write_parquet(parquet_file)
-    print("Dataset dataframe constructed!")
+    logger.info("Dataset dataframe constructed!")
     return pl.read_parquet(parquet_file)
 
 
 def construct_raw_dataset(filename):
-    print("Constructing raw dataset...")
+    logger.info("Constructing raw dataset...")
     df = collate_dataset()
     parquet_file = PUBCHEM_DIR / f"{filename}_raw.parquet"
     df.write_parquet(parquet_file)
-    print("Raw dataset constructed!")
+    logger.info("Raw dataset constructed!")
     return pl.read_parquet(parquet_file)
 
 
 def collate_dataset():
-    print("Collating dataset...")
+    logger.info("Collating dataset...")
     if not (PUBCHEM_DIR.exists() and len(tuple(PUBCHEM_DIR.glob("*.json")))):
         fetch_dataset()
 
     df = pl.concat(
         map(pl.read_json, PUBCHEM_DIR.glob("*.json")),
     ).drop("id")
-    print("dataset collated!")
+    logger.info("dataset collated!")
     return df
 
 
 def fetch_dataset():
-    print("Fetching dataset...")
+    logger.info("Fetching dataset...")
     kaggle.api.dataset_download_files(
         "burakhmmtgl/predict-molecular-properties", quiet=False, path=DATASET_DIR
     )
     shutil.unpack_archive(DATASET_DIR / "predict-molecular-properties.zip", PUBCHEM_DIR)
-    print("Dataset fetched!")
+    logger.info("Dataset fetched!")
 
 
 @lru_cache(maxsize=1)
@@ -172,7 +173,7 @@ def encode_orbital(orbital):
 
 
 def save_dataframe_to_dataset(df, filename):
-    print("Saving dataset to tensors...")
+    logger.info("Saving dataset to tensors...")
     with (filename.parent / f"{filename.stem}_x0{filename.suffix}").open("wb") as f:
         pickle.dump(properties_to_tensor(df).float(), f)
     with (filename.parent / f"{filename.stem}_x1{filename.suffix}").open("wb") as f:
@@ -180,7 +181,7 @@ def save_dataframe_to_dataset(df, filename):
     with (filename.parent / f"{filename.stem}_y{filename.suffix}").open("wb") as f:
         pickle.dump(df["En"].to_torch().float(), f)
     del df
-    print("Tensors saved!")
+    logger.info("Tensors saved!")
 
 
 def chunked_df(df, n):

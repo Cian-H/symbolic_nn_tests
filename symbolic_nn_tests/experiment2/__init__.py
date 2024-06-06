@@ -27,49 +27,25 @@ def test(loss_func, version, tensorboard=True, wandb=True):
         )
         logger.append(wandb_logger)
 
-    test_model(logger=logger, loss_func=loss_func, lr=LEARNING_RATE)
+    test_model(logger=logger, loss_func=loss_func)
 
     if wandb:
         _wandb.finish()
 
 
 def run(tensorboard: bool = True, wandb: bool = True):
+    from .model import unpacking_mse_loss
     from . import semantic_loss
-    from torch import nn
 
     test(
-        nn.functional.cross_entropy,
-        "cross_entropy",
+        unpacking_mse_loss,
+        "mse_loss",
         tensorboard=tensorboard,
         wandb=wandb,
     )
     test(
-        semantic_loss.similarity_cross_entropy,
-        "similarity_cross_entropy",
-        tensorboard=tensorboard,
-        wandb=wandb,
-    )
-    test(
-        semantic_loss.hasline_cross_entropy,
-        "hasline_cross_entropy",
-        tensorboard=tensorboard,
-        wandb=wandb,
-    )
-    test(
-        semantic_loss.hasloop_cross_entropy,
-        "hasloop_cross_entropy",
-        tensorboard=tensorboard,
-        wandb=wandb,
-    )
-    test(
-        semantic_loss.multisemantic_cross_entropy,
-        "multisemantic_cross_entropy",
-        tensorboard=tensorboard,
-        wandb=wandb,
-    )
-    test(
-        semantic_loss.garbage_cross_entropy,
-        "garbage_cross_entropy",
+        semantic_loss.positive_slope_linear_loss,
+        "positive_slope_linear_loss",
         tensorboard=tensorboard,
         wandb=wandb,
     )
