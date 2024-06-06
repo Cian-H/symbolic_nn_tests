@@ -1,7 +1,7 @@
 LEARNING_RATE = 10e-5
 
 
-def test(loss_func, version, tensorboard=True, wandb=True):
+def test(train_loss, val_loss, test_loss, version, tensorboard=True, wandb=True):
     from .model import main as test_model
 
     logger = []
@@ -27,7 +27,13 @@ def test(loss_func, version, tensorboard=True, wandb=True):
         )
         logger.append(wandb_logger)
 
-    test_model(logger=logger, loss_func=loss_func, lr=LEARNING_RATE)
+    test_model(
+        logger=logger,
+        train_loss=train_loss,
+        val_loss=val_loss,
+        test_loss=test_loss,
+        lr=LEARNING_RATE,
+    )
 
     if wandb:
         _wandb.finish()
@@ -35,41 +41,53 @@ def test(loss_func, version, tensorboard=True, wandb=True):
 
 def run(tensorboard: bool = True, wandb: bool = True):
     from . import semantic_loss
-    from torch import nn
+    from .model import oh_vs_cat_cross_entropy
 
     test(
-        nn.functional.cross_entropy,
-        "cross_entropy",
+        train_loss=oh_vs_cat_cross_entropy,
+        val_loss=oh_vs_cat_cross_entropy,
+        test_loss=oh_vs_cat_cross_entropy,
+        version="cross_entropy",
         tensorboard=tensorboard,
         wandb=wandb,
     )
     test(
-        semantic_loss.similarity_cross_entropy,
-        "similarity_cross_entropy",
+        train_loss=semantic_loss.similarity_cross_entropy,
+        val_loss=oh_vs_cat_cross_entropy,
+        test_loss=oh_vs_cat_cross_entropy,
+        version="similarity_cross_entropy",
         tensorboard=tensorboard,
         wandb=wandb,
     )
     test(
-        semantic_loss.hasline_cross_entropy,
-        "hasline_cross_entropy",
+        train_loss=semantic_loss.hasline_cross_entropy,
+        val_loss=oh_vs_cat_cross_entropy,
+        test_loss=oh_vs_cat_cross_entropy,
+        version="hasline_cross_entropy",
         tensorboard=tensorboard,
         wandb=wandb,
     )
     test(
-        semantic_loss.hasloop_cross_entropy,
-        "hasloop_cross_entropy",
+        train_loss=semantic_loss.hasloop_cross_entropy,
+        val_loss=oh_vs_cat_cross_entropy,
+        test_loss=oh_vs_cat_cross_entropy,
+        version="hasloop_cross_entropy",
         tensorboard=tensorboard,
         wandb=wandb,
     )
     test(
-        semantic_loss.multisemantic_cross_entropy,
-        "multisemantic_cross_entropy",
+        train_loss=semantic_loss.multisemantic_cross_entropy,
+        val_loss=oh_vs_cat_cross_entropy,
+        test_loss=oh_vs_cat_cross_entropy,
+        version="multisemantic_cross_entropy",
         tensorboard=tensorboard,
         wandb=wandb,
     )
     test(
-        semantic_loss.garbage_cross_entropy,
-        "garbage_cross_entropy",
+        train_loss=semantic_loss.garbage_cross_entropy,
+        val_loss=oh_vs_cat_cross_entropy,
+        test_loss=oh_vs_cat_cross_entropy,
+        version="garbage_cross_entropy",
         tensorboard=tensorboard,
         wandb=wandb,
     )

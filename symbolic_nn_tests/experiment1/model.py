@@ -38,7 +38,13 @@ def oh_vs_cat_cross_entropy(y_bin, y_cat):
     )
 
 
-def main(loss_func=oh_vs_cat_cross_entropy, logger=None, **kwargs):
+def main(
+    train_loss=oh_vs_cat_cross_entropy,
+    val_loss=oh_vs_cat_cross_entropy,
+    test_loss=oh_vs_cat_cross_entropy,
+    logger=None,
+    **kwargs,
+):
     import lightning as L
 
     from symbolic_nn_tests.train import TrainingWrapper
@@ -49,7 +55,9 @@ def main(loss_func=oh_vs_cat_cross_entropy, logger=None, **kwargs):
         logger = TensorBoardLogger(save_dir=".", name="logs/ffnn")
 
     train, val, test = get_singleton_dataset()
-    lmodel = TrainingWrapper(model, loss_func=loss_func)
+    lmodel = TrainingWrapper(
+        model, train_loss=train_loss, val_loss=val_loss, test_loss=val_loss
+    )
     lmodel.configure_optimizers(**kwargs)
     trainer = L.Trainer(max_epochs=20, logger=logger)
     trainer.fit(model=lmodel, train_dataloaders=train, val_dataloaders=val)

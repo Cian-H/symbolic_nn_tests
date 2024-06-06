@@ -3,16 +3,25 @@ import lightning as L
 
 
 class TrainingWrapper(L.LightningModule):
-    def __init__(self, model, loss_func=nn.functional.mse_loss, accuracy=None):
+    def __init__(
+        self,
+        model,
+        train_loss=nn.functional.mse_loss,
+        val_loss=nn.functional.mse_loss,
+        test_loss=nn.functional.mse_loss,
+        accuracy=None,
+    ):
         super().__init__()
         self.model = model
-        self.loss_func = loss_func
+        self.train_loss = train_loss
+        self.val_loss = val_loss
+        self.test_loss = val_loss
         self.accuracy = accuracy
 
-    def _forward_step(self, batch, batch_idx, label=""):
+    def _forward_step(self, batch, batch_idx, loss_func, label=""):
         x, y = batch
         y_pred = self.model(x)
-        loss = self.loss_func(y_pred, y)
+        loss = loss_func(y_pred, y)
         self.log(f"{label}{'_' if label else ''}loss", loss)
         if self.accuracy is not None:
             acc = self.accuracy(y_pred, y)
@@ -20,13 +29,13 @@ class TrainingWrapper(L.LightningModule):
         return loss
 
     def training_step(self, batch, batch_idx):
-        return self._forward_step(batch, batch_idx, label="train")
+        return self._forward_step(batch, batch_idx, self.train_loss, label="train")
 
     def validation_step(self, batch, batch_idx):
-        self._forward_step(batch, batch_idx, label="val")
+        self._forward_step(batch, batch_idx, self.val_loss, label="val")
 
     def test_step(self, batch, batch_idx):
-        self._forward_step(batch, batch_idx, label="test")
+        self._forward_step(batch, batch_idx, self.test_loss, label="test")
 
     def configure_optimizers(self, optimizer=optim.SGD, **kwargs):
         _optimizer = optimizer(self.parameters(), **kwargs)

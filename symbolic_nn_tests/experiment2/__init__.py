@@ -1,7 +1,7 @@
 LEARNING_RATE = 10e-5
 
 
-def test(loss_func, version, tensorboard=True, wandb=True):
+def test(train_loss, val_loss, test_loss, version, tensorboard=True, wandb=True):
     from .model import main as test_model
 
     logger = []
@@ -27,7 +27,13 @@ def test(loss_func, version, tensorboard=True, wandb=True):
         )
         logger.append(wandb_logger)
 
-    test_model(logger=logger, loss_func=loss_func)
+    test_model(
+        logger=logger,
+        train_loss=train_loss,
+        val_loss=val_loss,
+        test_loss=test_loss,
+        lr=LEARNING_RATE,
+    )
 
     if wandb:
         _wandb.finish()
@@ -38,14 +44,18 @@ def run(tensorboard: bool = True, wandb: bool = True):
     from . import semantic_loss
 
     test(
-        unpacking_mse_loss,
-        "mse_loss",
+        train_loss=unpacking_mse_loss,
+        val_loss=unpacking_mse_loss,
+        test_loss=unpacking_mse_loss,
+        version="mse_loss",
         tensorboard=tensorboard,
         wandb=wandb,
     )
     test(
-        semantic_loss.positive_slope_linear_loss,
-        "positive_slope_linear_loss",
+        train_loss=semantic_loss.positive_slope_linear_loss,
+        val_loss=unpacking_mse_loss,
+        test_loss=unpacking_mse_loss,
+        version="positive_slope_linear_loss",
         tensorboard=tensorboard,
         wandb=wandb,
     )

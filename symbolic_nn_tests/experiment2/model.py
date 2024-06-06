@@ -14,7 +14,11 @@ class Model(nn.Module):
         self.encode_x0 = self.create_xval_encoding_fn(self.x0_encoder)
         self.encode_x1 = self.create_xval_encoding_fn(self.x1_encoder)
         self.ff = nn.Sequential(
-            nn.Linear(17, 128),
+            nn.Linear(17, 512),
+            nn.ReLU(),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
             nn.ReLU(),
             nn.Linear(128, 64),
             nn.ReLU(),
@@ -62,7 +66,13 @@ def unpacking_mse_loss(out, y):
     return nn.functional.mse_loss(y_pred, y)
 
 
-def main(loss_func=unpacking_mse_loss, logger=None, **kwargs):
+def main(
+    train_loss=unpacking_mse_loss,
+    val_loss=unpacking_mse_loss,
+    test_loss=unpacking_mse_loss,
+    logger=None,
+    **kwargs,
+):
     import lightning as L
 
     from symbolic_nn_tests.train import TrainingWrapper
@@ -73,7 +83,12 @@ def main(loss_func=unpacking_mse_loss, logger=None, **kwargs):
         logger = TensorBoardLogger(save_dir=".", name="logs/ffnn")
 
     train, val, test = get_singleton_dataset()
-    lmodel = TrainingWrapper(Model(), loss_func=loss_func)
+    lmodel = TrainingWrapper(
+        Model(),
+        train_loss=train_loss,
+        val_loss=train_loss,
+        test_loss=train_loss,
+    )
     lmodel.configure_optimizers(optimizer=torch.optim.NAdam, **kwargs)
     trainer = L.Trainer(max_epochs=10, logger=logger)
     trainer.fit(model=lmodel, train_dataloaders=train, val_dataloaders=val)
