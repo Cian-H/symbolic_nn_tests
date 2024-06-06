@@ -1,6 +1,6 @@
 # Overview
 
-This is a testing sandbox for developing various methods if injecting symbolic knowledge into neural networks. This symbolic NN approach is intended to facilitate the training of models for physics based problems where process complexity and data availability are generally significant hindrances to the application of NNs. By injecting known, symbolic human knowledge we aim to guide the model towards the correct embedding space more quickly than could be achieved through pure statistical loss.
+This is a testing sandbox for developing various methods of injecting symbolic knowledge into neural networks. This symbolic NN approach is intended to facilitate the training of models for physics based problems where process complexity and data availability are generally significant hindrances to the application of NNs. By injecting known, symbolic human knowledge we aim to guide the model towards the correct embedding space more quickly than could be achieved through pure statistical loss.
 
 # Experiments
 
