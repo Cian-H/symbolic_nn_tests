@@ -40,21 +40,21 @@ def test(train_loss, val_loss, test_loss, version, tensorboard=True, wandb=True)
 
 
 def run(tensorboard: bool = True, wandb: bool = True):
-    from .model import unpacking_mse_loss
+    from .model import unpacking_smooth_l1_loss
     from . import semantic_loss
 
     test(
-        train_loss=unpacking_mse_loss,
-        val_loss=unpacking_mse_loss,
-        test_loss=unpacking_mse_loss,
-        version="mse_loss",
+        train_loss=unpacking_smooth_l1_loss,
+        val_loss=unpacking_smooth_l1_loss,
+        test_loss=unpacking_smooth_l1_loss,
+        version="smooth_l1_loss",
         tensorboard=tensorboard,
         wandb=wandb,
     )
     test(
         train_loss=semantic_loss.positive_slope_linear_loss,
-        val_loss=unpacking_mse_loss,
-        test_loss=unpacking_mse_loss,
+        val_loss=unpacking_smooth_l1_loss,
+        test_loss=unpacking_smooth_l1_loss,
         version="positive_slope_linear_loss",
         tensorboard=tensorboard,
         wandb=wandb,

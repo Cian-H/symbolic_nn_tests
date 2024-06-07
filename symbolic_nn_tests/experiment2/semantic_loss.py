@@ -66,4 +66,4 @@ def positive_slope_linear_loss(out, y):
     slope_penalty = (torch.nn.functional.softmax(-m * 500.0) + 1).mean()
 
     # Finally, let's get a smooth L1 loss and scale it based on these penalty functions
-    return nn.functional.mse_loss(y_pred, y) * residual_penalty * slope_penalty
+    return nn.functional.smooth_l1_loss(y_pred, y) * residual_penalty * slope_penalty

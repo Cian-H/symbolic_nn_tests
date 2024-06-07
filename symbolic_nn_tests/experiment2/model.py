@@ -61,15 +61,15 @@ def get_singleton_dataset():
     )
 
 
-def unpacking_mse_loss(out, y):
+def unpacking_smooth_l1_loss(out, y):
     _, y_pred = out
-    return nn.functional.mse_loss(y_pred, y)
+    return nn.functional.smooth_l1_loss(y_pred, y)
 
 
 def main(
-    train_loss=unpacking_mse_loss,
-    val_loss=unpacking_mse_loss,
-    test_loss=unpacking_mse_loss,
+    train_loss=unpacking_smooth_l1_loss,
+    val_loss=unpacking_smooth_l1_loss,
+    test_loss=unpacking_smooth_l1_loss,
     logger=None,
     **kwargs,
 ):
