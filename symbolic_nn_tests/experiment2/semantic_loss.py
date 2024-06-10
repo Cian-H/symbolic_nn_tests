@@ -43,27 +43,18 @@ def positive_slope_linear_loss(out, y):
     m, c = linear_fit(diff_electronegativity, y_pred)
 
     # To start with, we want to calculate a penalty based on deviation from a linear relationship
-    # Scaling is being based on 1/sech(w*r) as this increases multiplier as deviation grows.
-    # `w` was selected based on noting that the residual spread before eneg scaling was about 25;
-    # enegs were normalised as x/4, so we want to incentivize a spread of about 25/4~=6, and w=0.2
-    # causes the penalty function to cross 2 at just over 6. Yes, that's a bit arbitrary but we're
-    # just steering the model not applying hard constraints to it shold be fine.
     residual_penalty = (
-        (
-            linear_residuals(diff_electronegativity, y_pred, m, c)
-            / sech(0.2 * diff_electronegativity)
-        )
+        (1 / sech(linear_residuals(diff_electronegativity, y_pred, m, c)))
         .abs()
         .float()
         .mean()
     )
 
-    # We also need to calculate a penalty that incentivizes a positive slope. For this, im using softmax
-    # to scale the slope as it will penalise negative slopes while not just creating a reward hack for
-    # maximizing slope. The softmax function approximates 1 from about 5 onwards, so if we multiply m by
-    # 500, then our penalty should be almost minimised for any slope above 0.01 and maximised below 0.01.
-    # This should suffice for incentivizing the model to favour positive slopes.
-    slope_penalty = (torch.nn.functional.softmax(-m * 500.0) + 1).mean()
+    # We also need to calculate a penalty that incentivizes a positive slope. For this, im using softplus
+    # to scale the slope as it will penalise negative slopes without just creating a reward hack for
+    # maximizing slope.
+    slope_penalty = (nn.functional.softplus(-m) + 1).mean()
 
     # Finally, let's get a smooth L1 loss and scale it based on these penalty functions
     return nn.functional.smooth_l1_loss(y_pred, y) * residual_penalty * slope_penalty
+

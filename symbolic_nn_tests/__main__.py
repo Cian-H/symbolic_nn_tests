@@ -30,7 +30,7 @@ def main(
     import torch
 
     # Enable tensor cores for compatible GPUs
-    for i in torch.cuda.device_count():
+    for i in range(torch.cuda.device_count()):
         if torch.cuda.get_device_properties(i).major > 6:
             torch.set_float32_matmul_precision("medium")
 
