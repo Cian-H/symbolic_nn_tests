@@ -27,6 +27,13 @@ def main(
         bool, typer.Option(help="Whether or not to log via Weights & Biases")
     ] = True,
 ):
+    import torch
+
+    # Enable tensor cores for compatible GPUs
+    for i in torch.cuda.device_count():
+        if torch.cuda.get_device_properties(i).major > 6:
+            torch.set_float32_matmul_precision("medium")
+
     for i, n in enumerate(experiments, start=1):
         j = n - 1
         experiment = EXPERIMENTS[j].run
