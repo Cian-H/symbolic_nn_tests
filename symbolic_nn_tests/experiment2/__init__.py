@@ -47,14 +47,14 @@ def run(tensorboard: bool = True, wandb: bool = True):
     from .model import unpacking_smooth_l1_loss
     from . import semantic_loss
 
-    # test(
-    #     train_loss=unpacking_smooth_l1_loss,
-    #     val_loss=unpacking_smooth_l1_loss,
-    #     test_loss=unpacking_smooth_l1_loss,
-    #     version="smooth_l1_loss",
-    #     tensorboard=tensorboard,
-    #     wandb=wandb,
-    # )
+    test(
+        train_loss=unpacking_smooth_l1_loss,
+        val_loss=unpacking_smooth_l1_loss,
+        test_loss=unpacking_smooth_l1_loss,
+        version="smooth_l1_loss",
+        tensorboard=tensorboard,
+        wandb=wandb,
+    )
 
     version = "positive_slope_linear_loss"
     if wandb:
