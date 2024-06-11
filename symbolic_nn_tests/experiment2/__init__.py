@@ -20,11 +20,15 @@ def test(train_loss, val_loss, test_loss, version, tensorboard=True, wandb=True)
         import wandb as _wandb
         from lightning.pytorch.loggers import WandbLogger
 
-        wandb_logger = WandbLogger(
-            project="Symbolic_NN_Tests",
-            name=version,
-            dir="wandb",
-        )
+        if isinstance(wandb, WandbLogger):
+            wandb_logger = wandb
+        else:
+            wandb_logger = WandbLogger(
+                project="Symbolic_NN_Tests",
+                name=version,
+                dir="wandb",
+                log_model="all",
+            )
         logger.append(wandb_logger)
 
     test_model(
@@ -43,19 +47,33 @@ def run(tensorboard: bool = True, wandb: bool = True):
     from .model import unpacking_smooth_l1_loss
     from . import semantic_loss
 
+    # test(
+    #     train_loss=unpacking_smooth_l1_loss,
+    #     val_loss=unpacking_smooth_l1_loss,
+    #     test_loss=unpacking_smooth_l1_loss,
+    #     version="smooth_l1_loss",
+    #     tensorboard=tensorboard,
+    #     wandb=wandb,
+    # )
+
+    version = "positive_slope_linear_loss"
+    if wandb:
+        from lightning.pytorch.loggers import WandbLogger
+
+        wandb_logger = WandbLogger(
+            project="Symbolic_NN_Tests",
+            name=version,
+            dir="wandb",
+            log_model="all",
+        )
+    else:
+        wandb_logger = wandb
+
     test(
-        train_loss=unpacking_smooth_l1_loss,
+        train_loss=semantic_loss.positive_slope_linear_loss(wandb_logger, version),
         val_loss=unpacking_smooth_l1_loss,
         test_loss=unpacking_smooth_l1_loss,
-        version="smooth_l1_loss",
+        version=version,
         tensorboard=tensorboard,
-        wandb=wandb,
-    )
-    test(
-        train_loss=semantic_loss.positive_slope_linear_loss,
-        val_loss=unpacking_smooth_l1_loss,
-        test_loss=unpacking_smooth_l1_loss,
-        version="positive_slope_linear_loss",
-        tensorboard=tensorboard,
-        wandb=wandb,
+        wandb=wandb_logger,
     )
