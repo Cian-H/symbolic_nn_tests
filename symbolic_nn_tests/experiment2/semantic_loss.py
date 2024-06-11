@@ -18,10 +18,16 @@ import torch
 # proportionality.
 
 
-def positive_slope_linear_loss(wandb_logger=None, version="", device="cuda"):
-    a = nn.Parameter(data=torch.randn(1), requires_grad=True).to(device)
+class PositiveSlopeLinearLoss:
+    def __init__(self, wandb_logger=None, version="", device="cuda", log_freq=50):
+        self.a = nn.Parameter(data=torch.randn(1), requires_grad=True).to(device)
+        self.wandb_logger = wandb_logger
+        self.version = version
+        self.device = device
+        self.log_freq = log_freq
+        self.steps_since_log = 0
 
-    def f(out, y):
+    def __call__(self, out, y):
         x, y_pred = out
         x0, x1 = x
 
@@ -56,14 +62,15 @@ def positive_slope_linear_loss(wandb_logger=None, version="", device="cuda"):
         # We also need to calculate a penalty that incentivizes a positive slope. For this, im using relu
         # to scale the slope as it will penalise negative slopes without just creating a reward hack for
         # maximizing slope.
-        slope_penalty = (nn.functional.relu(a * (-m)) + 1).mean()
+        slope_penalty = (nn.functional.relu(self.a * (-m)) + 1).mean()
 
-        if wandb_logger:
-            wandb_logger.log_metrics({f"{version}-a": a})
+        if self.wandb_logger and (self.steps_since_log >= 50):
+            self.wandb_logger.log_metrics({f"{self.version}-a": self.a})
+            self.steps_since_log = 0
+        else:
+            self.steps_since_log += 1
 
         # Finally, let's get a smooth L1 loss and scale it based on these penalty functions
         return (
             nn.functional.smooth_l1_loss(y_pred, y) * residual_penalty * slope_penalty
         )
-
-    return f

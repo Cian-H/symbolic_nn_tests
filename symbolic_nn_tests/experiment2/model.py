@@ -82,7 +82,7 @@ def main(
         test_loss=test_loss,
     )
     lmodel.configure_optimizers(optimizer=torch.optim.NAdam, **kwargs)
-    trainer = L.Trainer(max_epochs=10, logger=logger)
+    trainer = L.Trainer(max_epochs=5, logger=logger)
     trainer.fit(model=lmodel, train_dataloaders=train, val_dataloaders=val)
     trainer.test(dataloaders=test)
 

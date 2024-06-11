@@ -70,7 +70,7 @@ def run(tensorboard: bool = True, wandb: bool = True):
         wandb_logger = wandb
 
     test(
-        train_loss=semantic_loss.positive_slope_linear_loss(wandb_logger, version),
+        train_loss=semantic_loss.PositiveSlopeLinearLoss(wandb_logger, version),
         val_loss=unpacking_smooth_l1_loss,
         test_loss=unpacking_smooth_l1_loss,
         version=version,
