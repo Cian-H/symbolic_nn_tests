@@ -63,11 +63,15 @@ def main(
     val_loss=unpacking_smooth_l1_loss,
     test_loss=unpacking_smooth_l1_loss,
     logger=None,
+    semantic_trainer=False,
     **kwargs,
 ):
     import lightning as L
 
-    from symbolic_nn_tests.train import TrainingWrapper
+    if semantic_trainer:
+        from .train import TrainingWrapper
+    else:
+        from symbolic_nn_tests.train import TrainingWrapper
 
     if logger is None:
         from lightning.pytorch.loggers import TensorBoardLogger

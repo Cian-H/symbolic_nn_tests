@@ -32,6 +32,8 @@ hvplot = "^0.10.0"
 pyarrow = "^16.1.0"
 loguru = "^0.7.2"
 plotly = "^5.22.0"
+snoop = "^0.4.3"
+scikit-optimize = "^0.10.2"
 
 
 [build-system]

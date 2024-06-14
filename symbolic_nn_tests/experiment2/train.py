@@ -1,20 +1,29 @@
-from symbolic_nn_tests.train import TrainingWrapper
+from symbolic_nn_tests.train import TrainingWrapper as _TrainingWrapper
+import torch
+from skopt import Optimizer
+from skopt.learning import RandomForestRegressor
 
 
-class SemanticModuleTrainingWrapper(TrainingWrapper):
-    def __init__(self, model, *args, loss_func0, loss_func1, loss_agg, **kwargs):
-        assert len(args) == 0
+class TrainingWrapper(_TrainingWrapper):
+    def __init__(self, *args, loss_rate_target=-10, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.loss_optimizer = Optimizer(
+            [(0.0, 1000.0)],
+            base_estimator=RandomForestRegressor(
+                n_jobs=-1,
+            ),
+            n_initial_points=10,
+            model_queue_size=10,
+            acq_func="gp_hedge",
+        )
+        self.loss_rate_target = torch.tensor(loss_rate_target).float()
+        self.losses = []
 
-        super().__init__(model, **kwargs)
-        self.loss_func0 = loss_func0
-        self.loss_func1 = loss_func1
-        self.loss_agg = loss_agg
+    def training_step(self, *args, **kwargs):
+        loss = super().training_step(*args, **kwargs)
+        self.adjust_train_loss(loss)
+        return loss
 
-    def _forward_step(self, batch, batch_idx, label=""):
-        x, y = batch
-        y_pred, y0, y1 = self.model(x)
-        loss = self.loss_func(y_pred, y)
-        loss0 = self.loss_func0(y0, x)
-        loss1 = self.loss_func1(y1, x)
-        self.log(f"{label}{'_' if label else ''}loss", loss)
-        return self.loss_agg(loss, loss0, loss1)
+    def adjust_train_loss(self, loss):
+        self.loss_optimizer.tell(self.train_loss.params, loss.item())
+        self.train_loss.params = self.loss_optimizer.ask()

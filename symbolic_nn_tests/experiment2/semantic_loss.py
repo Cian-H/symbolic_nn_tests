@@ -1,4 +1,5 @@
 from symbolic_nn_tests.experiment2.math import linear_fit, linear_residuals, sech
+from random import random
 from torch import nn
 import torch
 
@@ -18,16 +19,17 @@ import torch
 # proportionality.
 
 
-class PositiveSlopeLinearLoss:
+class PositiveSlopeLinearLoss(nn.Module):
     def __init__(self, wandb_logger=None, version="", device="cuda", log_freq=50):
-        self.a = nn.Parameter(data=torch.randn(1), requires_grad=True).to(device)
+        super().__init__()
+        self.params = [random()]
         self.wandb_logger = wandb_logger
         self.version = version
         self.device = device
         self.log_freq = log_freq
         self.steps_since_log = 0
 
-    def __call__(self, out, y):
+    def forward(self, out, y):
         x, y_pred = out
         x0, x1 = x
 
@@ -62,10 +64,10 @@ class PositiveSlopeLinearLoss:
         # We also need to calculate a penalty that incentivizes a positive slope. For this, im using relu
         # to scale the slope as it will penalise negative slopes without just creating a reward hack for
         # maximizing slope.
-        slope_penalty = (nn.functional.relu(self.a * (-m)) + 1).mean()
+        slope_penalty = (nn.functional.relu(self.params[0] * (-m)) + 1).mean()
 
-        if self.wandb_logger and (self.steps_since_log >= 50):
-            self.wandb_logger.log_metrics({f"{self.version}-a": self.a})
+        if self.wandb_logger and (self.steps_since_log >= self.log_freq):
+            self.wandb_logger.log_metrics({f"{self.version}-a": self.params})
             self.steps_since_log = 0
         else:
             self.steps_since_log += 1
