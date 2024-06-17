@@ -49,7 +49,11 @@ def get_singleton_dataset():
     from symbolic_nn_tests.experiment2.dataset import collate, pubchem
 
     return create_dataset(
-        dataset=pubchem, collate_fn=collate, batch_size=256, shuffle=True
+        dataset=pubchem,
+        collate_fn=collate,
+        batch_size=256,
+        shuffle_train=True,
+        num_workers=11,
     )
 
 

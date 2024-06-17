@@ -11,7 +11,9 @@ def create_semantic_cross_entropy(semantic_matrix):
         return ce_loss * semantic_penalty
 
     def oh_vs_cat_semantic_cross_entropy(input_oh, target_cat):
-        return semantic_cross_entropy(input_oh, torch.nn.functional.one_hot(target_cat))
+        return semantic_cross_entropy(
+            input_oh, torch.nn.functional.one_hot(target_cat, num_classes=10).float()
+        )
 
     return oh_vs_cat_semantic_cross_entropy
 

@@ -14,5 +14,11 @@ def create_dataset(
     **kwargs,
 ):
     ds = dataset(DATASET_DIR, download=True, transform=ToTensor())
-    train, val, test = (DataLoader(i, **kwargs) for i in random_split(ds, split))
+    shuffle = kwargs.pop("shuffle", False)
+    shuffle_train = kwargs.pop("shuffle_train", False)
+    to_shuffle = (shuffle or shuffle_train, shuffle, shuffle)
+    train, val, test = (
+        DataLoader(i, shuffle=s, **kwargs)
+        for i, s in zip(random_split(ds, split), to_shuffle)
+    )
     return train, val, test
