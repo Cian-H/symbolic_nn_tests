@@ -8,7 +8,7 @@ class TrainingWrapper(_TrainingWrapper):
     def __init__(self, *args, loss_rate_target=-10, **kwargs):
         super().__init__(*args, **kwargs)
         self.loss_optimizer = Optimizer(
-            [(0.0, 1000.0)],
+            [(0.0, 512.0), (0.0, 1024.0), (0.0, 512.0)],
             base_estimator=RandomForestRegressor(
                 n_jobs=-1,
             ),

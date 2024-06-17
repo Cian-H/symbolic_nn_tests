@@ -9,8 +9,8 @@ class Model(nn.Module):
 
         self.return_module_y = return_module_y
 
-        self.x0_encoder = nn.TransformerEncoderLayer(7, 7)
-        self.x1_encoder = nn.TransformerEncoderLayer(10, 10)
+        self.x0_encoder = nn.TransformerEncoderLayer(7, 7, dim_feedforward=512)
+        self.x1_encoder = nn.TransformerEncoderLayer(10, 10, dim_feedforward=1024)
         self.encode_x0 = self.create_xval_encoding_fn(self.x0_encoder)
         self.encode_x1 = self.create_xval_encoding_fn(self.x1_encoder)
         self.ff = nn.Sequential(

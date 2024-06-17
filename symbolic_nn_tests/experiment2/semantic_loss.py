@@ -1,4 +1,4 @@
-from symbolic_nn_tests.experiment2.math import linear_fit, linear_residuals, sech
+from symbolic_nn_tests.experiment2.math import linear_fit, linear_residuals
 from random import random
 from torch import nn
 import torch
@@ -22,7 +22,7 @@ import torch
 class PositiveSlopeLinearLoss(nn.Module):
     def __init__(self, wandb_logger=None, version="", device="cuda", log_freq=50):
         super().__init__()
-        self.params = [random()]
+        self.params = [random(), random(), random()]
         self.wandb_logger = wandb_logger
         self.version = version
         self.device = device
@@ -54,17 +54,15 @@ class PositiveSlopeLinearLoss(nn.Module):
         m, c = linear_fit(diff_electronegativity, y_pred)
 
         # To start with, we want to calculate a penalty based on deviation from a linear relationship
-        residual_penalty = (
-            (1 / sech(linear_residuals(diff_electronegativity, y_pred, m, c)))
-            .abs()
-            .float()
-            .mean()
-        )
+        r = linear_residuals(diff_electronegativity, y_pred, m, c)
+        residual_penalty = ((self.params[0] * r * r) + 1).float().mean()
 
         # We also need to calculate a penalty that incentivizes a positive slope. For this, im using relu
         # to scale the slope as it will penalise negative slopes without just creating a reward hack for
         # maximizing slope.
-        slope_penalty = (nn.functional.relu(self.params[0] * (-m)) + 1).mean()
+        slope_penalty = (
+            nn.functional.softplus(self.params[1] * (-m), beta=self.params[2]) + 1
+        ).mean()
 
         if self.wandb_logger and (self.steps_since_log >= self.log_freq):
             self.wandb_logger.log_metrics({f"{self.version}-a": self.params})
