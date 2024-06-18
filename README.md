@@ -52,33 +52,33 @@ This is a testing sandbox for developing various methods of injecting symbolic k
     - Multiple attempts carried out:
         - Simple penalties. Variations tested include:
         ```math
-        Loss = ( Softplus( -m ) + 1 ) * Smooth_L1_Loss
+        Loss = ( Softplus( -m ) + 1 ) * SmoothL1Loss
         ```
         ```math
-        Loss = ( Relu( -m ) + 1 ) * Smooth_L1_Loss
+        Loss = ( Relu( -m ) + 1 ) * SmoothL1Loss
         ```
         ```math
-        Loss = ( \frac{1}{Sech(|r|)} + 1 ) * Smooth_L1_Loss
+        Loss = ( \frac{1}{Sech(|r|)} + 1 ) * SmoothL1Loss
         ```
         ```math
-        Loss = ( {r}^2 + 1) * Smooth_L1_Loss
+        Loss = ( {r}^2 + 1) * SmoothL1Loss
         ```
         - Adaptive, self training penalties tuned by various methods. Best method found was optimisation by a random forest regressor. These tunable variants include:
         ```math
-        Loss = ( Softplus( \alpha * -m ) + 1 ) * Smooth_L1_Loss
+        Loss = ( Softplus( \alpha * -m ) + 1 ) * SmoothL1Loss
         ```
         ```math
-        Loss = ( Relu( \alpha * -m ) + 1 ) * Smooth_L1_Loss
+        Loss = ( Relu( \alpha * -m ) + 1 ) * SmoothL1Loss
         ```
         ```math
-        Loss = ( \frac{ 1 }{ Sech( \alpha * |r| ) } + 1 ) * Smooth_L1_Loss
+        Loss = ( \frac{ 1 }{ Sech( \alpha * |r| ) } + 1 ) * SmoothL1Loss
         ```
         ```math
-        Loss = ( \alpha * { r }^2 + 1) * Smooth_L1_Loss
+        Loss = ( \alpha * { r }^2 + 1) * SmoothL1Loss
         ```
         - Final adaptive semantic loss function tested was the following:
         ```math
-        Loss = ( \alpha * { r }^2 + 1) * ( \frac{ 1 }{ \beta } * log( 1 + exp( \beta * \gamma * -m ) ) + 1 ) * Smooth_L1_Loss
+        Loss = ( \alpha * { r }^2 + 1) * ( \frac{ 1 }{ \beta } * log( 1 + exp( \beta * \gamma * -m ) ) + 1 ) * SmoothL1Loss
         ```
 
 ### Results
