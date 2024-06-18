@@ -76,7 +76,7 @@ This is a testing sandbox for developing various methods of injecting symbolic k
         ```math
         Loss = ( \alpha * { r }^2 + 1) * SmoothL1Loss
         ```
-        - Final adaptive semantic loss function tested was the following:
+        - Final adaptive semantic loss function tested (called `positive_slope_linear_loss`) was the following:
         ```math
         Loss = ( \alpha * { r }^2 + 1) * ( \frac{ 1 }{ \beta } * log( 1 + exp( \beta * \gamma * -m ) ) + 1 ) * SmoothL1Loss
         ```
