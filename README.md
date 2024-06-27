@@ -4,7 +4,7 @@ This is a testing sandbox for developing various methods of injecting symbolic k
 
 # Experiments
 
-## Experiment 1 - Relationally embedded semantic loss function
+## Experiment 1 - Relationally embedded Semantic Loss Functions (SLF)
 
 ### Planning
 
@@ -29,7 +29,7 @@ This is a testing sandbox for developing various methods of injecting symbolic k
 - Interestingly: the "garbage" cross entropy seems to have also produced a very good result! This is likely because it hasn't been normalized to 1, so it may be simply amplifying the gradient by random amounts at all times. Basically acting as a fuzzy gradient booster.
 - I would consider this experiment a success, with some interesting open questions remaining worth further examination
 
-## Experiment 2 - Dataset qualitative characteristic derived semantic loss functions
+## Experiment 2 - Dataset qualitative characteristic derived SLFs
 
 ### Planning
 - Makes use of known physics equations that partially describe the problem to guide the model
@@ -98,7 +98,34 @@ This is a testing sandbox for developing various methods of injecting symbolic k
     - Adaptive, ML based loss functions do not appear to be converging quickly enough to train the model faster than the normal loss functions
 - For this reason, I would conclude this experiment as a failure
 
-## Experiment 3 - Physics informed semantic loss functions
+## Experiment 3 - Tensor Logic Network (TLN)
+
+- Revisiting QMNIST from Expt1 but using TLN instead of SLF.
+- Using LTNtorch library, as manually defining logical constraints would be a pain here.
+- Will create formalised logic definitions of non-fuzzy relations manually embedded in Expt1:
+    - Numbers with Lines:
+    ```math
+    \forall x ( Numeral(x) \to \exist HasLine(x) \oplus \exist NoLine(x) )
+    ```
+    - Numbers with Loops:
+    ```math
+    \forall x ( Numeral(x) \to \exist HasLoop(x) \oplus \exist NoLoop(x) )
+    ```
+    - Where:
+    ```math
+    Zero(x) \to NoLine(x) \land HasLoop(x) \\
+    One(x) \to HasLine(x) \land NoLoop(x) \\
+    Two(x) \to NoLine(x) \land NoLoop(x) \\
+    Three(x) \to NoLine(x) \land NoLoop(x) \\
+    Four(x) \to HasLine(x) \land NoLoop(x) \\
+    Five(x) \to HasLine(x) \land NoLoop(x) \\
+    Six(x) \to NoLine(x) \land HasLoop(x) \\
+    Seven(x) \to HasLine(x) \land NoLoop(x) \\
+    Eight(x) \to NoLine(x) \land HasLoop(x) \\
+    Nine(x) \to HasLine(x) \land HasLoop(x)
+    ```
+
+## Experiment 4 - Physics informed SLFs
 
 ### Planning
 
