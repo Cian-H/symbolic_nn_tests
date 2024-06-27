@@ -4,7 +4,7 @@ This is a testing sandbox for developing various methods of injecting symbolic k
 
 # Experiments
 
-## Experiment 1 - Semantically weighted loss
+## Experiment 1 - Relationally embedded semantic loss function
 
 ### Planning
 
