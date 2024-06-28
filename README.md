@@ -101,7 +101,7 @@ This is a testing sandbox for developing various methods of injecting symbolic k
 ## Experiment 3 - Tensor Logic Network (TLN)
 
 - Revisiting QMNIST from Expt1 but using TLN instead of SLF.
-- Using LTNtorch library, as manually defining logical constraints would be a pain here.
+- Using LTNtorch library or maybe Scallop lang, as manually defining logical constraints would be a pain here.
 - Will create formalised logic definitions of non-fuzzy relations manually embedded in Expt1:
     - Numbers with Lines:
     ```math
