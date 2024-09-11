@@ -1,6 +1,7 @@
 from functools import lru_cache
 import torch
 from torch import nn
+from torchmetrics import Accuracy
 
 
 model = nn.Sequential(
@@ -46,6 +47,7 @@ def main(
     train_loss=oh_vs_cat_cross_entropy,
     val_loss=oh_vs_cat_cross_entropy,
     test_loss=oh_vs_cat_cross_entropy,
+    accuracy=Accuracy(task="multiclass", num_classes=10),
     logger=None,
     trainer_callbacks=None,
     **kwargs,
@@ -61,7 +63,11 @@ def main(
 
     train, val, test = get_singleton_dataset()
     lmodel = TrainingWrapper(
-        model, train_loss=train_loss, val_loss=val_loss, test_loss=test_loss
+        model,
+        train_loss=train_loss,
+        val_loss=val_loss,
+        test_loss=test_loss,
+        accuracy=accuracy,
     )
     lmodel.configure_optimizers(**kwargs)
     trainer = L.Trainer(max_epochs=20, logger=logger, callbacks=trainer_callbacks)
