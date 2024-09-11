@@ -4,7 +4,7 @@ from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader, random_split
 
 
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 DATASET_DIR = PROJECT_ROOT / "datasets/"
 
 
