@@ -47,6 +47,7 @@ def main(
     val_loss=oh_vs_cat_cross_entropy,
     test_loss=oh_vs_cat_cross_entropy,
     logger=None,
+    trainer_callbacks=None,
     **kwargs,
 ):
     import lightning as L
@@ -63,7 +64,7 @@ def main(
         model, train_loss=train_loss, val_loss=val_loss, test_loss=test_loss
     )
     lmodel.configure_optimizers(**kwargs)
-    trainer = L.Trainer(max_epochs=20, logger=logger)
+    trainer = L.Trainer(max_epochs=20, logger=logger, callbacks=trainer_callbacks)
     trainer.fit(model=lmodel, train_dataloaders=train, val_dataloaders=val)
     trainer.test(dataloaders=test)
 

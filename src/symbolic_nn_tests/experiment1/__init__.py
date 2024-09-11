@@ -5,6 +5,7 @@ def test(train_loss, val_loss, test_loss, version, tensorboard=True, wandb=True)
     from .model import main as test_model
 
     logger = []
+    callbacks = []
 
     if tensorboard:
         from lightning.pytorch.loggers import TensorBoardLogger
@@ -19,6 +20,7 @@ def test(train_loss, val_loss, test_loss, version, tensorboard=True, wandb=True)
     if wandb:
         import wandb as _wandb
         from lightning.pytorch.loggers import WandbLogger
+        from symbolic_nn_tests.callbacks.wandb import ConfusionMatrixCallback
 
         wandb_logger = WandbLogger(
             project="Symbolic_NN_Tests",
@@ -26,9 +28,11 @@ def test(train_loss, val_loss, test_loss, version, tensorboard=True, wandb=True)
             dir="wandb",
         )
         logger.append(wandb_logger)
+        callbacks.append(ConfusionMatrixCallback(class_names=list(map(int, range(10)))))
 
     test_model(
         logger=logger,
+        trainer_callbacks=callbacks,
         train_loss=train_loss,
         val_loss=val_loss,
         test_loss=test_loss,

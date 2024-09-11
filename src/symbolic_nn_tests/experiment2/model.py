@@ -67,6 +67,7 @@ def main(
     val_loss=unpacking_smooth_l1_loss,
     test_loss=unpacking_smooth_l1_loss,
     logger=None,
+    trainer_callbacks=None,
     semantic_trainer=False,
     **kwargs,
 ):
@@ -90,7 +91,7 @@ def main(
         test_loss=test_loss,
     )
     lmodel.configure_optimizers(optimizer=torch.optim.NAdam, **kwargs)
-    trainer = L.Trainer(max_epochs=5, logger=logger)
+    trainer = L.Trainer(max_epochs=5, logger=logger, callbacks=trainer_callbacks)
     trainer.fit(model=lmodel, train_dataloaders=train, val_dataloaders=val)
     trainer.test(dataloaders=test)
 

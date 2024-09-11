@@ -13,6 +13,7 @@ def test(
     from .model import main as test_model
 
     logger = []
+    callbacks = []
 
     if tensorboard:
         from lightning.pytorch.loggers import TensorBoardLogger
@@ -27,6 +28,7 @@ def test(
     if wandb:
         import wandb as _wandb
         from lightning.pytorch.loggers import WandbLogger
+        from symbolic_nn_tests.callbacks.wandb import ConfusionMatrixCallback
 
         if isinstance(wandb, WandbLogger):
             wandb_logger = wandb
@@ -38,9 +40,11 @@ def test(
                 log_model="all",
             )
         logger.append(wandb_logger)
+        callbacks.append(ConfusionMatrixCallback(class_names=list(map(int, range(10)))))
 
     test_model(
         logger=logger,
+        trainer_callbacks=callbacks,
         train_loss=train_loss,
         val_loss=val_loss,
         test_loss=test_loss,
