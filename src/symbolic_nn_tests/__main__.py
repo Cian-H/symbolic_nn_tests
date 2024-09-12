@@ -2,10 +2,10 @@ import typer
 from typing import Optional, Iterable
 from typing_extensions import Annotated
 from loguru import logger
-from . import local, experiment1, experiment2, experiment3
+from . import local, experiment1, experiment2
 
 
-EXPERIMENTS = (local, experiment1, experiment2, experiment3)
+EXPERIMENTS = (local, experiment1, experiment2)
 
 
 def parse_int_or_intiterable(i: Optional[str] = None) -> Iterable[int]:
