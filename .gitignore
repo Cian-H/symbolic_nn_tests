@@ -165,6 +165,7 @@ cython_debug/
 .direnv
 scratchpad.ipynb
 datasets/
+checkpoints/
 explore/
 lightning_logs/
 logs/
