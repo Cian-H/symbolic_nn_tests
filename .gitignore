@@ -170,5 +170,5 @@ lightning_logs/
 logs/
 wandb/
 
-symbolic_nn_tests/local/*
-!symbolic_nn_tests/local/README.md
+src/symbolic_nn_tests/local/*
+!src/symbolic_nn_tests/local/README.md
