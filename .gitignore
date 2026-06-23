@@ -163,6 +163,7 @@ cython_debug/
 
 .jj
 .direnv
+.devenv
 scratchpad.ipynb
 datasets/
 checkpoints/

@@ -11,7 +11,7 @@ dependencies = [
     "torchvision>=0.19.1",
     "wandb>=0.17.9",
     "optuna>=4.0.0",
-    "setuptools>=74.1.2",
+    "setuptools<70",
     "gdown>=5.2.0",
     "bpython>=0.24",
     "ipython>=8.27.0",
@@ -32,10 +32,22 @@ dependencies = [
     "plotly>=5.24.0",
     "snoop>=0.4.3",
     "scikit-optimize>=0.10.2",
+    "scallop @ https://github.com/scallop-lang/scallop/releases/download/0.2.4/scallop-0.2.4-py3-none-any.whl ; sys_platform == 'linux' and python_version == '3.10'",
+    "scallopy @ https://github.com/scallop-lang/scallop/releases/download/0.2.4/scallopy-0.2.4-cp310-cp310-manylinux_2_27_x86_64.whl ; sys_platform == 'linux' and python_version == '3.10'",
+    "scallopy-ext @ https://github.com/scallop-lang/scallop/releases/download/0.2.4/scallopy_ext-0.2.4-py3-none-any.whl ; sys_platform == 'linux' and python_version == '3.10'",
 ]
 readme = "README.md"
-requires-python = ">= 3.8"
+requires-python = "==3.10.*"
 classifiers = ["Private :: Do Not Upload"]
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch" }
+torchvision = { index = "pytorch" }
 
 [project.scripts]
 "symbolic-nn-tests" = "symbolic_nn_tests:main"
@@ -44,12 +56,36 @@ classifiers = ["Private :: Do Not Upload"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.rye]
-managed = true
-dev-dependencies = []
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # isort
+    "W",    # pycodestyle warnings
+    "C90",  # mccabe (cyclomatic complexity)
+    "B",    # flake8-bugbear (good practice/bug prevention)
+    "C4",   # flake8-comprehensions (favors functional style)
+    "SIM",  # flake8-simplify (simplifies code)
+    "RET",  # flake8-return (consistent returns)
+    "UP",   # pyupgrade (modern python syntax)
+    "RUF",  # ruff-specific good practices
+]
+ignore = []
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
 
 [tool.hatch.metadata]
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/symbolic_nn_tests"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.18",
+    "ty>=0.0.52",
+]
