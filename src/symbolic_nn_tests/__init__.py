@@ -1,10 +1,10 @@
-from . import __main__
-
-import typer
 import ssl
 
+import typer
 
-ssl._create_default_https_context = ssl._create_unverified_context
+from . import __main__
+
+ssl._create_default_https_context = ssl._create_unverified_context  # type: ignore
 
 
 def main():

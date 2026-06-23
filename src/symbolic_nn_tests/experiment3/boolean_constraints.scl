@@ -1,0 +1,64 @@
+// Define a relation that stores the loop status of each digit
+type loop_prob(digit: i32, status: bool)
+
+// Add facts for each digit's loop status
+rel loop_prob = {
+    0.10::(0, true),
+    0.00::(0, false),
+    0.00::(1, true),
+    0.10::(1, false),
+    0.00::(2, true),
+    0.10::(2, false),
+    0.00::(3, true),
+    0.10::(3, false),
+    0.05::(4, true), // 4 may or may not have a loop
+    0.05::(4, false),
+    0.00::(5, true),
+    0.10::(5, false),
+    0.10::(6, true),
+    0.00::(6, false),
+    0.00::(7, true),
+    0.10::(7, false),
+    0.10::(8, true),
+    0.00::(8, false),
+    0.10::(9, true),
+    0.00::(9, false),
+}
+
+// We also do the same for lines in numbers
+type line_prob(digit: i32, status: bool)
+rel line_prob = {
+    0.00::(0, true),
+    0.10::(0, false),
+    0.10::(1, true),
+    0.00::(1, false),
+    0.00::(2, true),
+    0.10::(2, false),
+    0.05::(3, true),
+    0.05::(3, false),
+    0.10::(4, true),
+    0.00::(4, false),
+    0.10::(5, true),
+    0.00::(5, false),
+    0.00::(6, true),
+    0.10::(6, false),
+    0.10::(7, true),
+    0.00::(7, false),
+    0.00::(8, true),
+    0.10::(8, false),
+    0.05::(9, true),
+    0.05::(9, false),
+}
+
+type x_in(digit: i32)
+
+type has_loop(status: bool)
+rel has_loop(status) = x_in(digit) and loop_prob(digit, status)
+
+type has_line(status: bool)
+rel has_line(status) = x_in(digit) and line_prob(digit, status)
+
+// type x_in(a: i32)
+// type shape(digit: i32, has_loop: bool, has_line: bool)
+// rel shape(digit, a, b) = x_in(digit) and has_loop(digit, a) and has_line(digit, b)
+

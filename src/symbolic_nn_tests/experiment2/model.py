@@ -1,45 +1,10 @@
 from functools import lru_cache
+
 import torch
 from torch import nn
+from torchmetrics.regression import R2Score
 
-
-class Model(nn.Module):
-    def __init__(self, return_module_y=False):
-        super().__init__()
-
-        self.return_module_y = return_module_y
-
-        self.x0_encoder = nn.TransformerEncoderLayer(7, 7, dim_feedforward=512)
-        self.x1_encoder = nn.TransformerEncoderLayer(10, 10, dim_feedforward=1024)
-        self.encode_x0 = self.create_xval_encoding_fn(self.x0_encoder)
-        self.encode_x1 = self.create_xval_encoding_fn(self.x1_encoder)
-        self.ff = nn.Sequential(
-            nn.Linear(17, 32),
-            nn.ReLU(),
-            nn.Linear(32, 16),
-            nn.ReLU(),
-            nn.Linear(16, 8),
-            nn.ReLU(),
-            nn.Linear(8, 1),
-        )
-
-    @staticmethod
-    def create_xval_encoding_fn(layer):
-        def encoding_fn(xbatch):
-            return torch.stack([layer(x)[-1] for x in xbatch])
-
-        return encoding_fn
-
-    def forward(self, x):
-        x0, x1 = x
-        y0 = self.encode_x0(x0)
-        y1 = self.encode_x1(x1)
-        y = torch.cat([y0, y1], dim=1)
-        y = self.ff(y)
-        if self.return_module_y:
-            return x, (y, y0, y1)
-        else:
-            return x, y
+from symbolic_nn_tests.models import PubChemModel as Model
 
 
 # This is just a quick, lazy way to ensure all models are trained on the same dataset
@@ -53,13 +18,24 @@ def get_singleton_dataset():
         collate_fn=collate,
         batch_size=256,
         shuffle_train=True,
-        num_workers=11,
+        num_workers=0,
     )
 
 
 def unpacking_smooth_l1_loss(out, y):
     _, y_pred = out
     return nn.functional.smooth_l1_loss(y_pred, y)
+
+
+class UnpackingR2Score(R2Score):
+    def update(self, preds, target):
+        if isinstance(preds, tuple):
+            _, y_pred = preds
+            if isinstance(y_pred, tuple):
+                y_pred = y_pred[0]
+        else:
+            y_pred = preds
+        super().update(y_pred.view(-1), target.view(-1))
 
 
 def main(
@@ -89,6 +65,7 @@ def main(
         train_loss=train_loss,
         val_loss=val_loss,
         test_loss=test_loss,
+        accuracy=UnpackingR2Score(),
     )
     lmodel.configure_optimizers(optimizer=torch.optim.NAdam, **kwargs)
     trainer = L.Trainer(max_epochs=5, logger=logger, callbacks=trainer_callbacks)

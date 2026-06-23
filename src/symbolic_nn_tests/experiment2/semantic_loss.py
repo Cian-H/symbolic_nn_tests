@@ -1,8 +1,9 @@
-from symbolic_nn_tests.experiment2.math import linear_fit, linear_residuals
 from random import random
-from torch import nn
-import torch
 
+import torch
+from torch import nn
+
+from symbolic_nn_tests.experiment2.math import linear_fit, linear_residuals
 
 # TODO: implement semantic loss functions
 # These functions would enforce relationships we expect to be present in the results
@@ -31,7 +32,7 @@ class PositiveSlopeLinearLoss(nn.Module):
 
     def forward(self, out, y):
         x, y_pred = out
-        x0, x1 = x
+        x0, _x1 = x
 
         # Here, we want to make semantic use of the differential electronegativity of the molecule
         # so start by calculating that
@@ -42,7 +43,7 @@ class PositiveSlopeLinearLoss(nn.Module):
             torch.tensor(
                 [
                     (i[:, 3] - mean).abs().sum()
-                    for i, mean in zip(x0, mean_electronegativities)
+                    for i, mean in zip(x0, mean_electronegativities, strict=True)
                 ],
                 dtype=torch.float32,
             )
@@ -53,13 +54,12 @@ class PositiveSlopeLinearLoss(nn.Module):
         # En (y) vs differential electronegativity on the x vs y axes, so y_pred is y here
         m, c = linear_fit(diff_electronegativity, y_pred)
 
-        # To start with, we want to calculate a penalty based on deviation from a linear relationship
+        # To start with, we calculate a penalty based on deviation from a linear relationship
         r = linear_residuals(diff_electronegativity, y_pred, m, c)
         residual_penalty = ((self.params[0] * r * r) + 1).float().mean()
 
-        # We also need to calculate a penalty that incentivizes a positive slope. For this, im using relu
-        # to scale the slope as it will penalise negative slopes without just creating a reward hack for
-        # maximizing slope.
+        # We also need a penalty that incentivizes a positive slope. Using relu to scale
+        # the slope penalises negative slopes without creating a reward hack for maximizing it.
         slope_penalty = (
             nn.functional.softplus(self.params[1] * (-m), beta=self.params[2]) + 1
         ).mean()
@@ -71,6 +71,4 @@ class PositiveSlopeLinearLoss(nn.Module):
             self.steps_since_log += 1
 
         # Finally, let's get a smooth L1 loss and scale it based on these penalty functions
-        return (
-            nn.functional.smooth_l1_loss(y_pred, y) * residual_penalty * slope_penalty
-        )
+        return nn.functional.smooth_l1_loss(y_pred, y) * residual_penalty * slope_penalty

@@ -1,18 +1,20 @@
-import kaggle
-import polars as pl
-import shutil
-from functools import lru_cache
-from periodic_table import PeriodicTable
-import numpy as np
-import torch
-from torch.utils.data import TensorDataset
+import os
 import pickle
-from multiprocessing import Pool
-from symbolic_nn_tests.dataloader import DATASET_DIR
+import shutil
 import warnings
-from tqdm.auto import tqdm
-from loguru import logger
+from functools import lru_cache
+from itertools import pairwise
+from multiprocessing import Pool
 
+import numpy as np
+import polars as pl
+import torch
+from loguru import logger
+from periodic_table import PeriodicTable
+from torch.utils.data import TensorDataset
+from tqdm.auto import tqdm
+
+from symbolic_nn_tests.dataloader import DATASET_DIR
 
 warnings.filterwarnings(action="ignore", category=UserWarning)
 
@@ -28,7 +30,7 @@ ORBITALS = {
 
 
 def collate(batch):
-    x0_in, x1_in, y_in = list(zip(*batch))
+    x0_in, x1_in, y_in = list(zip(*batch, strict=True))
     x0_out = torch.nested.as_nested_tensor(list(x0_in))
     x1_out = torch.nested.as_nested_tensor(list(x1_in))
     y_out = torch.as_tensor(y_in)
@@ -95,6 +97,8 @@ def collate_dataset():
 
 def fetch_dataset():
     logger.info("Fetching dataset...")
+    import kaggle
+
     kaggle.api.dataset_download_files(
         "burakhmmtgl/predict-molecular-properties", quiet=False, path=DATASET_DIR
     )
@@ -109,21 +113,19 @@ def get_periodic_table():
 
 def add_molecule_encodings(df):
     atom_properties, atom_electrons = encode_molecules(df["atoms"])
-    return df.with_columns(
-        atom_properties=atom_properties, atom_electrons=atom_electrons
-    )
+    return df.with_columns(atom_properties=atom_properties, atom_electrons=atom_electrons)
 
 
 def encode_molecules(series):
     # Yes, it is gross and RAM inefficient to do it this way but i dont have all day...
     with Pool() as p:
         molecules = p.map(encode_molecule, series)
-    properties, electrons = zip(*molecules)
+    properties, electrons = zip(*molecules, strict=True)
     return pl.Series(properties), pl.Series(electrons)
 
 
 def encode_molecule(molecule):
-    properties, electrons = zip(*_encode_molecule(molecule))
+    properties, electrons = zip(*_encode_molecule(molecule), strict=True)
     properties = pl.Series(properties)
     return properties, electrons
 
@@ -145,8 +147,7 @@ def encode_atom(atom):
                 element.atomic / 100.0,
                 element.atomic_mass / 257.0,
                 element.electron_affinity / 350.0,  # Highest known is just below 350
-                element.electronegativity_pauling
-                / 4.0,  # Max theoretical val is 4.0 here
+                element.electronegativity_pauling / 4.0,  # Max theoretical val is 4.0 here
             ],
         ),
         encode_electron_config(element.electron_configuration),
@@ -164,10 +165,9 @@ def encode_orbital(orbital):
     azimuthal, capacity = ORBITALS[subshell]
     return np.array(
         [
-            1.0
-            / shell,  # This is the simplest way to normalize shell, as shells become less distinct as n increases
-            azimuthal / 4.0,  # This is simply normalizing the azimuthal quantum number
-            n / capacity,  # Basically encoding this as a proportion of "fullness"
+            1.0 / shell,  # Normalize shell as they become less distinct as n increases
+            azimuthal / 4.0,  # Normalize the azimuthal quantum number
+            n / capacity,  # Encode as a proportion of fullness
         ],
     )
 
@@ -187,18 +187,15 @@ def save_dataframe_to_dataset(df, filename):
 def chunked_df(df, n):
     chunk_size = (len(df) // n) + 1
     chunk_boundaries = [*range(0, len(df), chunk_size), len(df)]
-    chunk_ranges = list(zip(chunk_boundaries[:-1], chunk_boundaries[1:]))
+    chunk_ranges = list(pairwise(chunk_boundaries))
     yield from (df[i:j] for i, j in chunk_ranges)
 
 
 def properties_to_tensor(df):
     with Pool() as p:
-        out = torch.cat(
-            p.map(
-                property_chunk_to_torch, chunked_df(df["atom_properties"], p._processes)
-            )
+        return torch.cat(
+            p.map(property_chunk_to_torch, chunked_df(df["atom_properties"], os.cpu_count() or 1))
         )
-    return out
 
 
 def property_chunk_to_torch(chunk):
@@ -223,10 +220,9 @@ def molecule_electrons_to_torch(e):
 
 
 def atom_electrons_to_torch(e):
-    # pytorch doesn't like doubly nested tensors, and the unnocupied orbitals still exist here even if
-    # they're empty, so it makes sense to pad here instead. No elements in the dataset exceed an
-    # azimuthal of 3, so we only need to pad to length 10. Also: i'm realising here that the orbital
-    # info will be unecessary if we have to pad here anyway
+    # Pytorch doesn't like doubly nested tensors, and unnocupied orbitals still exist here
+    # even if empty, so pad here. Max azimuthal is 3, pad to 10.
+    # Also: orbital info might be unecessary if we pad here anyway
     return pad_tensor_to(torch.tensor(tuple(x[-1] for x in e)), 10)
 
 

@@ -1,7 +1,8 @@
-from symbolic_nn_tests.train import TrainingWrapper as _TrainingWrapper
 import torch
 from skopt import Optimizer
 from skopt.learning import RandomForestRegressor
+
+from symbolic_nn_tests.train import TrainingWrapper as _TrainingWrapper
 
 
 class TrainingWrapper(_TrainingWrapper):
@@ -25,5 +26,5 @@ class TrainingWrapper(_TrainingWrapper):
         return loss
 
     def adjust_train_loss(self, loss):
-        self.loss_optimizer.tell(self.train_loss.params, loss.item())
-        self.train_loss.params = self.loss_optimizer.ask()
+        self.loss_optimizer.tell(self.train_loss.params, loss.item())  # type: ignore
+        self.train_loss.params = self.loss_optimizer.ask()  # type: ignore

@@ -8,7 +8,6 @@ def test(
     version,
     tensorboard=True,
     wandb=True,
-    semantic_trainer=False,
 ):
     from .model import main as test_model
 
@@ -18,12 +17,15 @@ def test(
     if tensorboard:
         from lightning.pytorch.loggers import TensorBoardLogger
 
+        from symbolic_nn_tests.callbacks.tensorboard import TensorBoardConfusionMatrixCallback
+
         tb_logger = TensorBoardLogger(
             save_dir=".",
-            name="logs/experiment2",
+            name="logs/experiment3",
             version=version,
         )
         logger.append(tb_logger)
+        callbacks.append(TensorBoardConfusionMatrixCallback(class_names=list(map(str, range(10)))))
 
     if wandb:
         from lightning.pytorch.loggers import WandbLogger
@@ -50,7 +52,6 @@ def test(
         val_loss=val_loss,
         test_loss=test_loss,
         lr=LEARNING_RATE,
-        semantic_trainer=semantic_trainer,
     )
 
     if wandb:
@@ -58,37 +59,24 @@ def test(
 
 
 def run(tensorboard: bool = True, wandb: bool = True):
-    from . import semantic_loss
-    from .model import unpacking_smooth_l1_loss
+    from .semantic_loss import BooleanSemanticLoss, KleeneSemanticLoss
 
+    # loss_fn_boolean = BooleanSemanticLoss()
+    # test(
+    #     train_loss=loss_fn_boolean,
+    #     val_loss=loss_fn_boolean,
+    #     test_loss=loss_fn_boolean,
+    #     version="differentiable_boolean_constraints",
+    #     tensorboard=tensorboard,
+    #     wandb=wandb,
+    # )
+
+    loss_fn_kleene = KleeneSemanticLoss()
     test(
-        train_loss=unpacking_smooth_l1_loss,
-        val_loss=unpacking_smooth_l1_loss,
-        test_loss=unpacking_smooth_l1_loss,
-        version="smooth_l1_loss",
+        train_loss=loss_fn_kleene,
+        val_loss=loss_fn_kleene,
+        test_loss=loss_fn_kleene,
+        version="differentiable_kleene_constraints",
         tensorboard=tensorboard,
         wandb=wandb,
-    )
-
-    version = "positive_slope_linear_loss"
-    if wandb:
-        from lightning.pytorch.loggers import WandbLogger
-
-        wandb_logger = WandbLogger(
-            project="Symbolic_NN_Tests",
-            name=version,
-            dir="wandb",
-            log_model="all",
-        )
-    else:
-        wandb_logger = wandb
-
-    test(
-        train_loss=semantic_loss.PositiveSlopeLinearLoss(wandb_logger, version, log_freq=50),
-        val_loss=unpacking_smooth_l1_loss,
-        test_loss=unpacking_smooth_l1_loss,
-        version=version,
-        tensorboard=tensorboard,
-        wandb=wandb_logger,
-        semantic_trainer=True,
     )

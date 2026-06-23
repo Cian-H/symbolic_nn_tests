@@ -12,6 +12,12 @@ This is a testing sandbox for developing various methods of injecting symbolic k
 - Makes use of manually made reward matrices to weight rewards depending on how "close" the model was
 - Very rudimentary example of semantic loss
 
+#### Mathematical Implementation Details
+Initially, the semantic penalty was multiplied by the cross entropy loss and summed over the batch. This unintentionally acted as a massive scalar multiplier on the gradients (by a factor of the batch size). The semantic maths have since been refined to:
+1. **Probabilities:** Apply `softmax` to raw logits to convert them to probabilities before absolute difference calculations.
+2. **Scale Invariance:** Average (`.mean()`) the penalty across the batch instead of summing (`.sum()`) to prevent batch size from inflating the penalty magnitude.
+3. **Additive Loss:** Add the penalty to the base loss (`ce_loss + alpha * semantic_penalty`) rather than multiplying them, preventing extreme, unintentional learning rate inflation on the base gradients.
+
 ### Results
 
 - Training loss

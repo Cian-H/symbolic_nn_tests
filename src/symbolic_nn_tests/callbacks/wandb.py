@@ -1,6 +1,7 @@
+import torch
 from lightning.pytorch.callbacks import Callback
 from lightning.pytorch.loggers.wandb import WandbLogger
-import torch
+
 import wandb
 
 
@@ -19,8 +20,8 @@ class ConfusionMatrixCallback(Callback):
     def on_validation_epoch_end(self, trainer, pl_module):
         if trainer.state.stage != "sanity_check":
             y_pred = torch.concat(pl_module.epoch_step_preds)
-            y_pred = torch.argmax(y_pred, axis=1)
-            y = torch.concat(tuple(map(lambda xy: xy[1], trainer.val_dataloaders)))
+            y_pred = torch.argmax(y_pred, dim=1)
+            y = torch.concat(tuple(xy[1] for xy in trainer.val_dataloaders))
             logger = get_wandb_logger(trainer.loggers)
             logger.experiment.log(
                 {

@@ -1,48 +1,76 @@
+from typing import Annotated
+
 import typer
-from typing import Optional, Iterable
-from typing_extensions import Annotated
 from loguru import logger
-from . import local, experiment1, experiment2
+
+from . import experiment1, experiment2, experiment3, local
+
+EXPERIMENTS = (local, experiment1, experiment2, experiment3)
 
 
-EXPERIMENTS = (local, experiment1, experiment2)
-
-
-def parse_int_or_intiterable(i: Optional[str] = None) -> Iterable[int]:
+def parse_int_or_intiterable(i: str | None = None) -> list[int]:
     if i is None:
-        return range(1, len(EXPERIMENTS))
-    else:
-        return list(map(int, i.replace("local", "0").split(",")))
+        return list(range(1, len(EXPERIMENTS)))
+    return list(map(int, i.replace("local", "0").split(",")))
 
 
 def main(
     experiments: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             help="A comma separated list of experiments to be run. Defaults to all.",
         ),
     ] = None,
-    tensorboard: Annotated[
-        bool, typer.Option(help="Whether or not to log via tensorboard")
-    ] = True,
-    wandb: Annotated[
-        bool, typer.Option(help="Whether or not to log via Weights & Biases")
-    ] = True,
+    tensorboard: Annotated[bool, typer.Option(help="Whether or not to log via tensorboard")] = True,
+    wandb: Annotated[bool, typer.Option(help="Whether or not to log via Weights & Biases")] = True,
 ):
-    experiments = parse_int_or_intiterable(experiments)
+    experiments_to_run = parse_int_or_intiterable(experiments)
 
     import torch
+
+    torch.backends.cudnn.benchmark = True
 
     # Enable tensor cores for compatible GPUs
     for i in range(torch.cuda.device_count()):
         if torch.cuda.get_device_properties(i).major > 6:
             torch.set_float32_matmul_precision("medium")
 
-    for i, n in enumerate(experiments, start=1):
-        experiment = EXPERIMENTS[n].run
-        logger.info(f"Running Experiment {n} ({i}/{len(experiments)})...")
-        experiment(tensorboard=tensorboard, wandb=wandb)
+    import functools
+    from collections.abc import Callable
+    from typing import Any
+
+    tasks: list[Callable[[], Any]] = []
+
+    # Helper to capture tasks instead of running them sequentially
+    def capture_tasks(module):
+        original_test = module.test
+
+        def mock_test(*args, **kwargs):
+            mock = functools.partial(original_test, *args, **kwargs)
+            tasks.append(mock)
+
+        module.test = mock_test
+        module.run(tensorboard, wandb)
+        module.test = original_test
+
+    for n in experiments_to_run:
+        experiment = EXPERIMENTS[n]
+        if hasattr(experiment, "test"):
+            capture_tasks(experiment)
+        else:
+            tasks.append(functools.partial(experiment.run, tensorboard=tensorboard, wandb=wandb))
+
+    logger.info(f"Running {len(tasks)} models sequentially...")
+    for task in tasks:
+        task()
+
+    from symbolic_nn_tests.plot_metrics import generate_and_log_summary_plots
+
+    generate_and_log_summary_plots()
 
 
 if __name__ == "__main__":
+    import torch.multiprocessing as mp
+
+    mp.set_start_method("spawn", force=True)
     typer.run(main)

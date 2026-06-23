@@ -1,21 +1,24 @@
 import torch
 
 
+class SemanticCrossEntropy:
+    def __init__(self, semantic_matrix, alpha=1.0):
+        self.semantic_matrix = semantic_matrix
+        self.alpha = alpha
+
+    def __call__(self, input_oh, target_cat):
+        target = torch.nn.functional.one_hot(target_cat, num_classes=10).float()
+        ce_loss = torch.nn.functional.cross_entropy(input_oh, target)
+
+        penalty_tensor = self.semantic_matrix.to(target.device)[target.argmax(dim=1)]
+        input_prob = torch.softmax(input_oh, dim=1)
+        abs_diff = (target - input_prob).abs()
+        semantic_penalty = (abs_diff * penalty_tensor).mean()
+        return ce_loss + self.alpha * semantic_penalty
+
+
 def create_semantic_cross_entropy(semantic_matrix):
-    def semantic_cross_entropy(input, target):
-        ce_loss = torch.nn.functional.cross_entropy(input, target)
-
-        penalty_tensor = semantic_matrix[target.argmax(dim=1)]
-        abs_diff = (target - input).abs()
-        semantic_penalty = (abs_diff * penalty_tensor).sum()
-        return ce_loss * semantic_penalty
-
-    def oh_vs_cat_semantic_cross_entropy(input_oh, target_cat):
-        return semantic_cross_entropy(
-            input_oh, torch.nn.functional.one_hot(target_cat, num_classes=10).float()
-        )
-
-    return oh_vs_cat_semantic_cross_entropy
+    return SemanticCrossEntropy(semantic_matrix)
 
 
 # NOTE: This similarity matrix defines loss scaling factors for misclassification
@@ -37,7 +40,7 @@ SIMILARITY_MATRIX = torch.tensor(
         [1.0, 1.0, 1.0, 1.5, 1.0, 1.0, 1.0, 1.0, 2.0, 1.0],
         [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0],
     ]
-).to("cuda")
+)
 SIMILARITY_MATRIX /= SIMILARITY_MATRIX.sum()  # Normalized to sum of 1
 
 similarity_cross_entropy = create_semantic_cross_entropy(SIMILARITY_MATRIX)
@@ -49,10 +52,8 @@ similarity_cross_entropy = create_semantic_cross_entropy(SIMILARITY_MATRIX)
 HASLINE_MATRIX = torch.tensor(
     #    0,    1,     2,     3,    4,    5,     6,    7,    8,     9
     [False, True, False, False, True, True, False, True, False, True]
-).to("cuda")
-HASLINE_MATRIX = torch.stack([i ^ HASLINE_MATRIX for i in HASLINE_MATRIX]).type(
-    torch.float64
 )
+HASLINE_MATRIX = torch.stack([i ^ HASLINE_MATRIX for i in HASLINE_MATRIX]).type(torch.float64)
 HASLINE_MATRIX += 1
 HASLINE_MATRIX /= HASLINE_MATRIX.sum()  # Normalize to sum of 1
 
@@ -63,10 +64,8 @@ hasline_cross_entropy = create_semantic_cross_entropy(HASLINE_MATRIX)
 HASLOOP_MATRIX = torch.tensor(
     #   0,     1,     2,     3,     4,     5,    6,     7,    8,    9
     [True, False, False, False, False, False, True, False, True, True]
-).to("cuda")
-HASLOOP_MATRIX = torch.stack([i ^ HASLOOP_MATRIX for i in HASLOOP_MATRIX]).type(
-    torch.float64
 )
+HASLOOP_MATRIX = torch.stack([i ^ HASLOOP_MATRIX for i in HASLOOP_MATRIX]).type(torch.float64)
 HASLOOP_MATRIX += 1
 HASLOOP_MATRIX /= HASLOOP_MATRIX.sum()  # Normalize to sum of 1
 
@@ -82,7 +81,7 @@ multisemantic_cross_entropy = create_semantic_cross_entropy(MULTISEMANTIC_MATRIX
 # NOTE: As a final test, lets make something similar to tehse but where there's no knowledge,
 #   just random data. This will create a benchmark for the effects of this process wothout the
 #   "knowledge" component
-GARBAGE_MATRIX = torch.rand(10, 10).to("cuda")
+GARBAGE_MATRIX = torch.rand(10, 10)
 GARBAGE_MATRIX /= GARBAGE_MATRIX.sum()
 
 garbage_cross_entropy = create_semantic_cross_entropy(GARBAGE_MATRIX)

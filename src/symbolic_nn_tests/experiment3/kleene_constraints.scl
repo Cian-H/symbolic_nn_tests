@@ -1,0 +1,73 @@
+// Implement a Kleene logic system
+
+// Define the three states
+type Kleene = True | False | Undecidable
+
+// Define the NOT operation as a set of facts
+type NOT(a: Kleene, res: Kleene)
+rel NOT = {
+    (True, False),
+    (False, True),
+    (Undecidable, Undecidable)
+}
+
+// Define the AND operation (Min) as a complete truth table
+type AND(a: Kleene, b: Kleene, res: Kleene)
+rel AND = {
+    (False, False, False), (False, Undecidable, False), (False, True, False),
+    (Undecidable, False, False), (Undecidable, Undecidable, Undecidable), (Undecidable, True, Undecidable),
+    (True, False, False), (True, Undecidable, Undecidable), (True, True, True)
+}
+
+// Define the OR operation (Max) as a complete truth table
+type OR(a: Kleene, b: Kleene, res: Kleene)
+rel OR = {
+    (False, False, False), (False, Undecidable, Undecidable), (False, True, True),
+    (Undecidable, False, Undecidable), (Undecidable, Undecidable, Undecidable), (Undecidable, True, True),
+    (True, False, True), (True, Undecidable, True), (True, True, True)
+}
+
+type loop_prob(digit: i32, status: Kleene)
+rel loop_prob = {
+    (0, True),
+    (1, False),
+    (2, False),
+    (3, False),
+    (4, Undecidable),
+    (5, False),
+    (6, True),
+    (7, False),
+    (8, True),
+    (9, True),
+}
+
+type line_prob(digit: i32, status: Kleene)
+rel line_prob = {
+    (0, False),
+    (1, True),
+    (2, False),
+    (3, Undecidable),
+    (4, True),
+    (5, True),
+    (6, False),
+    (7, True),
+    (8, False),
+    (9, Undecidable),
+}
+
+type x_in(digit: i32)
+
+type has_loop(status: Kleene)
+rel has_loop(status) = x_in(digit) and loop_prob(digit, status)
+
+type has_line(status: Kleene)
+rel has_line(status) = x_in(digit) and line_prob(digit, status)
+
+type KleeneToInt(k: Kleene, i: i32)
+rel KleeneToInt = {(True, 1), (False, -1), (Undecidable, 0)}
+
+type has_loop_out(status: i32)
+rel has_loop_out(i) = has_loop(k) and KleeneToInt(k, i)
+
+type has_line_out(status: i32)
+rel has_line_out(i) = has_line(k) and KleeneToInt(k, i)

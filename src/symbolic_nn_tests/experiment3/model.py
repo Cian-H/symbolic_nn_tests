@@ -4,6 +4,8 @@ import torch
 from torch import nn
 from torchmetrics import Accuracy
 
+from symbolic_nn_tests.models import QMNISTModel as Model
+
 
 def collate(batch):
     x, y = zip(*batch, strict=True)
@@ -59,11 +61,7 @@ def main(
         logger = TensorBoardLogger(save_dir=".", name="logs/ffnn")
 
     train, val, test = get_singleton_dataset()
-
-    from symbolic_nn_tests.models import QMNISTModel
-
-    model = QMNISTModel()
-
+    model = Model()
     lmodel = TrainingWrapper(
         model,
         train_loss=train_loss,

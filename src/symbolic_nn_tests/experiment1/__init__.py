@@ -1,9 +1,7 @@
 LEARNING_RATE = 10e-5
 
 
-def test(
-    train_loss, val_loss, test_loss, accuracy, version, tensorboard=True, wandb=True
-):
+def test(train_loss, val_loss, test_loss, accuracy, version, tensorboard=True, wandb=True):
     from .model import main as test_model
 
     logger = []
@@ -12,16 +10,20 @@ def test(
     if tensorboard:
         from lightning.pytorch.loggers import TensorBoardLogger
 
+        from symbolic_nn_tests.callbacks.tensorboard import TensorBoardConfusionMatrixCallback
+
         tb_logger = TensorBoardLogger(
             save_dir=".",
-            name="logs/comparison",
+            name="logs/experiment1",
             version=version,
         )
         logger.append(tb_logger)
+        callbacks.append(TensorBoardConfusionMatrixCallback(class_names=list(map(str, range(10)))))
 
     if wandb:
-        import wandb as _wandb
         from lightning.pytorch.loggers import WandbLogger
+
+        import wandb as _wandb
         from symbolic_nn_tests.callbacks.wandb import ConfusionMatrixCallback
 
         wandb_logger = WandbLogger(
