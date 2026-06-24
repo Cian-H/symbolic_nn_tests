@@ -1,4 +1,8 @@
+import matplotlib.pyplot as plt
+import torch
 from lightning.pytorch.callbacks import Callback
+from lightning.pytorch.loggers.tensorboard import TensorBoardLogger
+from sklearn.metrics import confusion_matrix
 
 
 class MyPrintingCallback(Callback):
@@ -7,12 +11,6 @@ class MyPrintingCallback(Callback):
 
     def on_train_end(self, trainer, pl_module):
         print("Training is ending")
-
-
-import matplotlib.pyplot as plt
-import torch
-from lightning.pytorch.loggers.tensorboard import TensorBoardLogger
-from sklearn.metrics import confusion_matrix
 
 
 class TensorBoardConfusionMatrixCallback(Callback):

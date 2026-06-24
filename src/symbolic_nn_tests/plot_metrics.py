@@ -9,6 +9,7 @@ EXPERIMENT_TO_DATASET = {
     "experiment1": "QMNIST",
     "experiment2": "PubChem",
     "experiment3": "QMNIST",
+    "experiment4": "QMNIST",
 }
 
 
@@ -80,6 +81,7 @@ def generate_and_log_summary_plots(base_dir="logs"):
             r.replace("experiment1/", "e1: ")
             .replace("experiment2/", "e2: ")
             .replace("experiment3/", "e3: ")
+            .replace("experiment4/", "e4: ")
             .replace("differentiable_", "")
             .replace("_constraints", "")
             .replace("_cross_entropy", "")
@@ -127,7 +129,8 @@ def generate_and_log_summary_plots(base_dir="logs"):
         writer.close()
 
         print(
-            f"Summary bar chart for {dataset} generated and written to {dataset_summary_dir} (Images tab)"
+            f"Summary bar chart for {dataset} generated and written "
+            f"to {dataset_summary_dir} (Images tab)"
         )
 
 

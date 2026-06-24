@@ -21,7 +21,7 @@ def test(
 
         tb_logger = TensorBoardLogger(
             save_dir=".",
-            name="logs/experiment3",
+            name="logs/experiment4",
             version=version,
         )
         logger.append(tb_logger)
@@ -59,24 +59,59 @@ def test(
 
 
 def run(tensorboard: bool = True, wandb: bool = True):
-    from .semantic_loss import KleeneSemanticLoss
+    from .exact_kleene_loss import ExactKleeneSemanticLoss
+    from .exact_loss import ExactSemanticLoss
+    from .ltn_kleene_loss import LTNKleeneLoss
+    from .ltn_loss import LTNSemanticLoss
 
-    # loss_fn_boolean = BooleanSemanticLoss()
-    # test(
-    #     train_loss=loss_fn_boolean,
-    #     val_loss=loss_fn_boolean,
-    #     test_loss=loss_fn_boolean,
-    #     version="differentiable_boolean_constraints",
-    #     tensorboard=tensorboard,
-    #     wandb=wandb,
-    # )
-
-    loss_fn_kleene = KleeneSemanticLoss()
+    loss_fn_exact = ExactSemanticLoss()
     test(
-        train_loss=loss_fn_kleene,
-        val_loss=loss_fn_kleene,
-        test_loss=loss_fn_kleene,
-        version="differentiable_kleene_constraints",
+        train_loss=loss_fn_exact,
+        val_loss=loss_fn_exact,
+        test_loss=loss_fn_exact,
+        version="exact_semantic_loss",
+        tensorboard=tensorboard,
+        wandb=wandb,
+    )
+
+    loss_fn_ltn = LTNSemanticLoss()
+    test(
+        train_loss=loss_fn_ltn,
+        val_loss=loss_fn_ltn,
+        test_loss=loss_fn_ltn,
+        version="ltn_semantic_loss",
+        tensorboard=tensorboard,
+        wandb=wandb,
+    )
+
+    loss_fn_exact_kleene = ExactKleeneSemanticLoss()
+    test(
+        train_loss=loss_fn_exact_kleene,
+        val_loss=loss_fn_exact_kleene,
+        test_loss=loss_fn_exact_kleene,
+        version="exact_kleene_semantic_loss",
+        tensorboard=tensorboard,
+        wandb=wandb,
+    )
+
+    loss_fn_ltn_kleene = LTNKleeneLoss()
+    test(
+        train_loss=loss_fn_ltn_kleene,
+        val_loss=loss_fn_ltn_kleene,
+        test_loss=loss_fn_ltn_kleene,
+        version="ltn_kleene_semantic_loss",
+        tensorboard=tensorboard,
+        wandb=wandb,
+    )
+
+    from .ltn_belnap_loss import LTNBelnapLoss
+
+    loss_fn_ltn_belnap = LTNBelnapLoss()
+    test(
+        train_loss=loss_fn_ltn_belnap,
+        val_loss=loss_fn_ltn_belnap,
+        test_loss=loss_fn_ltn_belnap,
+        version="ltn_belnap_semantic_loss",
         tensorboard=tensorboard,
         wandb=wandb,
     )
