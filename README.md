@@ -273,3 +273,26 @@ handles true logical contradiction (Overdetermined / `(1.0, 1.0)`) and ignorance
   this is probably moreso a matter of optimising `alpha` and `temperature` than
   it is a matter of this not being able to work. But if so, the approach in
   Experiment 1 is likely superior in most cases.
+
+## Experiment 6 - Application of Semantically Meaningful Gradients (PINNs)
+
+### Planning
+
+- Attempts to embed semantic knowledge by converting to a gradient and applying
+  that gradient as part of the training (tech nique used for PINNs)
+- The goal is to achieve a similar effect to Experiment 1, but without having to
+  manually modify gradients every time. Basically: we want to bake the semantic
+  knowledge directly into the gradient flow of training
+- After some trial and error: implementing this PINN using the PCGrad method.
+
+### Results
+
+- Test results show this approach generally UNDERperformed relative to plain
+  categorical cross entropy.
+
+### Conclusion
+
+- This experiment is a clear failure. I suspect that maybe the derived formula
+  we're embedding isn't a rich enough representation to get meaningful gradients
+  out of. Should probably re-test this with the actual physics based test from
+  experiment 2.
