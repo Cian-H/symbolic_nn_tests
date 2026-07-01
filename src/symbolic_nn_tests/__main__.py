@@ -3,9 +3,9 @@ from typing import Annotated
 import typer
 from loguru import logger
 
-from . import experiment1, experiment2, experiment3, experiment4, local
+from . import experiment1, experiment2, experiment3, experiment4, experiment5, local
 
-EXPERIMENTS = (local, experiment1, experiment2, experiment3, experiment4)
+EXPERIMENTS = (local, experiment1, experiment2, experiment3, experiment4, experiment5)
 
 
 def parse_int_or_intiterable(i: str | None = None) -> list[int]:
